@@ -142,7 +142,7 @@ module Minerva
 
     private
 
-    def attr_or_default(attribute, default = [''])
+    def attr_or_default(attribute, default = [])
       attribute.present? ? attribute : default
     end
   end
