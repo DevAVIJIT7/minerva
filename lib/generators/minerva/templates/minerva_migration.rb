@@ -25,14 +25,12 @@ class CreateMinervaTables < MIGRATION_CLASS
   def change
     enable_extension 'plpgsql'
     enable_extension 'btree_gin'
-    enable_extension 'dblink'
     enable_extension 'fuzzystrmatch'
     enable_extension 'hstore'
     enable_extension 'intarray'
     enable_extension 'pg_stat_statements'
     enable_extension 'pg_trgm'
     enable_extension 'pgcrypto'
-    enable_extension 'postgres_fdw'
     enable_extension 'citext'
 
     create_table 'alignments', id: :serial, force: :cascade do |t|
