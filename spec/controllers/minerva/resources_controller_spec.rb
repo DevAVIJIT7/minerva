@@ -420,7 +420,7 @@ module Minerva
                   action.call
                   expect(json_response['resources'].count).to eq(1)
                   expect(json_response['resources'].first['accessMode'])
-                    .to eq([''])
+                    .to eq([])
                 end
               end
 
@@ -643,7 +643,7 @@ module Minerva
               'id' => resource.id,
               'name' => resource.name.to_s,
               'description' => resource.description.to_s,
-              'subject' => [''],
+              'subject' => [],
               'url' => resource.url,
               'ltiLink' => {},
               'learningResourceType' => ['Game'],
@@ -658,10 +658,10 @@ module Minerva
               'timeRequired' => '',
               'technicalFormat' => 'text/html',
               'educationalAudience' => ['student'],
-              'accessibilityAPI' => [''],
+              'accessibilityAPI' => [],
               'accessibilityInputMethods' => ['fullMouseControl'],
-              'accessibilityFeatures' => [''],
-              'accessibilityHazards' => [''],
+              'accessibilityFeatures' => [],
+              'accessibilityHazards' => [],
               'accessMode' => %w[orientation color textOnImage position visual],
               'publishDate' => resource.created_at.iso8601(3),
               'rating' => '0',

@@ -45,7 +45,11 @@ module Minerva
         tf = transform(filter, expand_objectives: params.fetch('extensions.expandObjectives', false))
         joins_sql = (has_fields ? tf[:joins] : all_joins).uniq.join(' ')
 
-        resources = Resources::Resource.select(fields).joins(joins_sql).where(tf[:where])
+        if fields.is_a?(Array)
+          self.fields = self.fields.join(',')
+        end
+
+        resources = Resources::Resource.select("DISTINCT ON (#{sort.query_field}, resources.id) #{fields}").joins(joins_sql).where(tf[:where])
                                        .order("#{sort.query_field} #{order_by}")
 
         total_count = Resources::Resource.joins(joins_sql).where(tf[:where]).count('distinct resources.id')
