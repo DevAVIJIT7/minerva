@@ -16,7 +16,7 @@
 
 module Minerva
   class ResourceSerializer < ActiveModel::Serializer
-    include Minerva.configuration.serializer_extensions[:resource_serializer] if Minerva.configuration.serializer_extensions.try(:[], :resource_serializer)
+    prepend Minerva.configuration.serializer_extensions[:resource_serializer] if Minerva.configuration.serializer_extensions.try(:[], :resource_serializer)
 
     attribute :id
 
