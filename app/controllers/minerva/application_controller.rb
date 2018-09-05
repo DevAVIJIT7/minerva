@@ -22,6 +22,10 @@ module Minerva
 
     private
 
+    def access_token
+      ActionController::HttpAuthentication::Token.token_and_options(request)&.first
+    end
+
     def authorize
       Minerva.configuration.authorizer.call(self)
     end

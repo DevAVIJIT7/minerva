@@ -23,7 +23,8 @@ module Minerva
       search_result = Search::Engine.new(params).perform
       set_pagination_headers(search_result.pagination)
       resources = ActiveModel::Serializer::CollectionSerializer.new(search_result.resources, serializer: ResourceSerializer,
-                                                                                             fields: params[:fields].try(:split, ','), warning: search_result.warning)
+                                                                    access_token: access_token, fields: params[:fields].try(:split, ','),
+                                                                    warning: search_result.warning)
       render json: { resources: resources }.merge(search_result.warning)
     rescue Errors::LtiSearchError => ex
       render json: ex.error_data, status: :bad_request
