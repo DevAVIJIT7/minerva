@@ -31,7 +31,9 @@ module Minerva
                 else
                   pre_params = SqlParam.from(tsv_text: val, taxonomies_name: val)
                   sql_params = SqlParam.ar_params(pre_params)
-                  "#{clause.operator == '<>' ? 'NOT ' : ''}(resources.tsv_text @@ plainto_tsquery(:#{pre_params[:tsv_text][:uniq_sym]}) OR taxonomies.name = :#{pre_params[:taxonomies_name][:uniq_sym]})"
+                  "#{clause.operator == '<>' ? 'NOT ' : ''}(resources.tsv_text @@ plainto_tsquery(:#{pre_params[:tsv_text][:uniq_sym]}) OR
+                  EXISTS(SELECT 1 FROM taxonomies INNER JOIN alignments ON alignments.taxonomy_id = taxonomies.id
+                  WHERE alignments.resource_id = resources.id AND taxonomies.name = :#{pre_params[:taxonomies_name][:uniq_sym]}))".squish
                 end
 
         SqlResult.new(sql: query, joins: joins, sql_params: sql_params)

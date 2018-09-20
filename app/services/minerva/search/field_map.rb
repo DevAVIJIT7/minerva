@@ -22,11 +22,6 @@ module Minerva
 
       attr_accessor :minerva_map
 
-      TAXONOMIES_JOIN = ['LEFT OUTER JOIN alignments on alignments.resource_id = resources.id',
-                         'LEFT OUTER JOIN taxonomies on taxonomies.id = alignments.taxonomy_id'].freeze
-      SUBJECTS_JOIN = ['LEFT OUTER JOIN resources_subjects ON resources_subjects.resource_id = resources.id',
-                       'LEFT OUTER JOIN subjects on subjects.id = resources_subjects.subject_id'].freeze
-
       TAXONOMIES_SELECT = "(select json_agg(json_build_object('id', taxonomies.id, 'opensalt_identifier', COALESCE(taxonomies.opensalt_identifier, ''), 'description', COALESCE(taxonomies.description, ''), 'alignment_type', COALESCE(taxonomies.alignment_type, ''), 'source', COALESCE(taxonomies.source, ''), 'identifier', COALESCE(taxonomies.identifier, ''))) FROM taxonomies INNER JOIN alignments on taxonomies.id = alignments.taxonomy_id WHERE alignments.resource_id = resources.id)"
       TEXT_COMPLEXITY_SELECT = "jsonb_build_array(json_build_object('name', 'Flesch-Kincaid', 'value', resources.text_complexity->>'flesch_kincaid'), json_build_object('name', 'Lexile', 'value', resources.text_complexity->>'lexile'))"
       EFFICACY_SELECT = '(select json_agg(CASE WHEN resource_stats.taxonomy_ident IS NOT NULL THEN json_build_object(resource_stats.taxonomy_ident, resource_stats.effectiveness) ELSE \'{}\'::json END) from resource_stats WHERE resource_stats.resource_id = resources.id)'
@@ -60,20 +55,20 @@ module Minerva
         end
 
         @minerva_map = [
-          FieldTypes::Search.new('search', nil, nil, joins: TAXONOMIES_JOIN),
+          FieldTypes::Search.new('search', nil, nil),
           FieldTypes::CaseInsensitiveString.new('name', 'resources.name', :name, is_sortable: true),
           FieldTypes::CaseInsensitiveString.new('description', 'resources.description', :description, is_sortable: true),
           FieldTypes::CaseInsensitiveString.new('publisher', 'resources.publisher', :publisher, is_sortable: true),
-          FieldTypes::CaseInsensitiveString.new('subject', SUBJECT_SELECT, :subject, joins: SUBJECTS_JOIN, query_field: 'subjects.name'),
-          FieldTypes::Efficacy.new('efficacy', EFFICACY_SELECT, :efficacy, joins: ['LEFT OUTER JOIN resource_stats ON resource_stats.resource_id = resources.id'], query_field: 'resource_stats.effectiveness'),
+          FieldTypes::Subject.new('subject', SUBJECT_SELECT, :subject, query_field: 'subjects.name'),
+          FieldTypes::Efficacy.new('efficacy', EFFICACY_SELECT, :efficacy,  query_field: 'resource_stats.effectiveness'),
           FieldTypes::LearningObjective.new('learningObjectives', TAXONOMIES_SELECT, :learningObjectives, query_field: 'taxonomies.identifier', as_option: :learning_objectives),
-          FieldTypes::LearningObjective.new('learningObjectives.targetName', TAXONOMIES_SELECT, :learningObjectives, joins: TAXONOMIES_JOIN, as_option: :learning_objectives, query_field: 'taxonomies.identifier'),
-          FieldTypes::LearningObjective.new('learningObjectives.caseItemGUID', TAXONOMIES_SELECT, :learningObjectives, joins: TAXONOMIES_JOIN, as_option: :learning_objectives, query_field: 'taxonomies.opensalt_identifier'),
-          FieldTypes::LearningObjective.new('learningObjectives.alignmentType', TAXONOMIES_SELECT, :learningObjectives, joins: TAXONOMIES_JOIN, as_option: :learning_objectives, query_field: 'taxonomies.alignment_type'),
-          FieldTypes::LearningObjective.new('learningObjectives.targetDescription', TAXONOMIES_SELECT, :learningObjectives, joins: TAXONOMIES_JOIN, as_option: :learning_objectives, query_field: 'taxonomies.description'),
-          FieldTypes::LearningObjective.new('learningObjectives.targetURL', TAXONOMIES_SELECT, :learningObjectives, joins: TAXONOMIES_JOIN, as_option: :learning_objectives, query_field: nil),
-          FieldTypes::LearningObjective.new('learningObjectives.educationalFramework', TAXONOMIES_SELECT, :learningObjectives, joins: TAXONOMIES_JOIN, as_option: :learning_objectives, query_field: nil),
-          FieldTypes::LearningObjective.new('learningObjectives.caseItemUri', TAXONOMIES_SELECT, :learningObjectives, as_option: :learning_objectives, joins: TAXONOMIES_JOIN, query_field: 'taxonomies.source'),
+          FieldTypes::LearningObjective.new('learningObjectives.targetName', TAXONOMIES_SELECT, :learningObjectives, as_option: :learning_objectives, query_field: 'taxonomies.identifier'),
+          FieldTypes::LearningObjective.new('learningObjectives.caseItemGUID', TAXONOMIES_SELECT, :learningObjectives, as_option: :learning_objectives, query_field: 'taxonomies.opensalt_identifier'),
+          FieldTypes::LearningObjective.new('learningObjectives.alignmentType', TAXONOMIES_SELECT, :learningObjectives, as_option: :learning_objectives, query_field: 'taxonomies.alignment_type'),
+          FieldTypes::LearningObjective.new('learningObjectives.targetDescription', TAXONOMIES_SELECT, :learningObjectives, as_option: :learning_objectives, query_field: 'taxonomies.description'),
+          FieldTypes::LearningObjective.new('learningObjectives.targetURL', TAXONOMIES_SELECT, :learningObjectives, as_option: :learning_objectives, query_field: nil),
+          FieldTypes::LearningObjective.new('learningObjectives.educationalFramework', TAXONOMIES_SELECT, :learningObjectives, as_option: :learning_objectives, query_field: nil),
+          FieldTypes::LearningObjective.new('learningObjectives.caseItemUri', TAXONOMIES_SELECT, :learningObjectives, as_option: :learning_objectives, query_field: 'taxonomies.source'),
           FieldTypes::CaseInsensitiveString.new('learningResourceType', 'resources.learning_resource_type', :learningResourceType, as_option: :learning_resource_type, is_sortable: true),
           FieldTypes::CaseInsensitiveString.new('language', 'resources.language', :language, is_sortable: true),
           FieldTypes::CaseInsensitiveString.new('typicalAgeRange', 'resources.typical_age_range', :typicalAgeRange, as_option: :typical_age_range, is_sortable: true),

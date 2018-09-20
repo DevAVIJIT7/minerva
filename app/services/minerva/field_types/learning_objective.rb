@@ -22,7 +22,7 @@ module Minerva
       def to_sql(clause, ops = {})
         query = if filter_field == 'learningObjectives'
                   if null_check(clause)
-                    null_clause(clause)
+                    "#{clause.operator == '<>' ? '' : 'NOT'}(EXISTS(SELECT 1 FROM alignments WHERE alignments.resource_id = resources.id))"
                   else
                     '1=0'
                   end
@@ -67,7 +67,7 @@ module Minerva
                   check_standard_ids(clause, ops)
                 elsif %w[learningObjectives.educationalFramework
                          learningObjectives.targetURL]
-                      .include?(filter_field) # we don't have these in db, so returning 1=1 for sql
+                      .include?(filter_field) # we don't have these in db, so returning 1=0 for sql
                   '1=0'
                 end
         SqlResult.new(sql: query, joins: joins)

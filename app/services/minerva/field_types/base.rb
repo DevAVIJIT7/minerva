@@ -17,6 +17,7 @@
 module Minerva
   module FieldTypes
     class Base
+
       attr_accessor :joins, :filter_field, :is_sortable, :select_sql,
                     :as_option, :query_field, :output_field, :search_allowed
 

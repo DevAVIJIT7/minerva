@@ -49,10 +49,10 @@ module Minerva
           self.fields = self.fields.join(',')
         end
 
-        resources = Resources::Resource.select("DISTINCT ON (#{sort.query_field}, resources.id) #{fields}").joins(joins_sql).where(tf[:where])
+        resources = Resources::Resource.select("#{fields}").where(tf[:where])
                                        .order("#{sort.query_field} #{order_by}")
 
-        total_count = Resources::Resource.joins(joins_sql).where(tf[:where]).count('distinct resources.id')
+        total_count = Resources::Resource.where(tf[:where]).count('resources.id')
         result = PaginationService.new(resources, total_count).page(limit, offset)
         result.warning = warning
         result

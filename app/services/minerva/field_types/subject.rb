@@ -18,17 +18,19 @@ require_relative 'base'
 
 module Minerva
   module FieldTypes
-    class Efficacy < Base
+    class Subject < Base
       def to_sql(clause, _ops = {})
-        exists_sql = "EXISTS(SELECT 1 FROM resource_stats
-                      WHERE resource_stats.resource_id = resources.id)".squish
+        unique_field = generate_uniq_field
+        exists_sql = "EXISTS(SELECT 1 FROM subjects INNER JOIN resources_subjects ON resources_subjects.subject_id = subjects.id
+                      WHERE resources_subjects.resource_id = resources.id AND :query_part)"
         query =
-            if null_check(clause)
-              "#{clause.operator == '<>' ? '' : 'NOT'}(#{exists_sql})"
-            else
-              '1=1'
-            end
-        SqlResult.new(sql: query)
+          if null_check(clause)
+            exists_sql.gsub(':query_part', null_clause(clause))
+          else
+            exists_sql.gsub(':query_part', "#{query_field}#{clause.operator == 'ILIKE' ? '::text' : ''}
+            #{clause.operator} :#{unique_field}")
+          end
+        SqlResult.new(sql: query, sql_params: { unique_field.to_sym => clause.value })
       end
     end
   end

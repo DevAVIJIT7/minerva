@@ -22,11 +22,24 @@ module Minerva
 
     let(:field) { 'resource_stats.effectiveness' }
     let(:target) do
-      FieldTypes::Efficacy.new('efficacy', EFFICACY_SELECT, :efficacy, joins: ['LEFT OUTER JOIN resource_stats ON resource_stats.resource_id = resources.id'], query_field: 'resource_stats.effectiveness')
+      FieldTypes::Efficacy.new('efficacy', EFFICACY_SELECT, :efficacy, query_field: 'resource_stats.effectiveness')
     end
 
     describe '#to_sql' do
-      include_examples 'null_check'
+
+      context 'null check' do
+        it 'checks presence of efficacy ' do
+          result = target.to_sql(double(value: 'NULL', operator: '='))
+          expect(result.sql).to eq('NOT(EXISTS(SELECT 1 FROM resource_stats WHERE resource_stats.resource_id = resources.id))')
+          expect(result.sql_params.keys.count).to eq(0)
+        end
+
+        it 'checks absence of efficacy ' do
+          result = target.to_sql(double(value: 'NULL', operator: '<>'))
+          expect(result.sql).to eq('(EXISTS(SELECT 1 FROM resource_stats WHERE resource_stats.resource_id = resources.id))')
+          expect(result.sql_params.keys.count).to eq(0)
+        end
+      end
 
       context 'for other operators' do
         it 'directly filters using the operator' do

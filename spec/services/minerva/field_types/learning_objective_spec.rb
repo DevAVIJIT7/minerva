@@ -43,7 +43,19 @@ module Minerva
         let(:field) { 'taxonomies.identifier' }
         let(:target) { FieldTypes::LearningObjective.new('learningObjectives', TAXONOMIES_SELECT, :learningObjectives, query_field: 'taxonomies.identifier', as_option: :learning_objectives) }
 
-        include_examples 'null_check'
+        context 'null check' do
+          it 'checks presence of efficacy ' do
+            result = target.to_sql(double(value: 'NULL', operator: '='))
+            expect(result.sql).to eq('NOT(EXISTS(SELECT 1 FROM alignments WHERE alignments.resource_id = resources.id))')
+            expect(result.sql_params.keys.count).to eq(0)
+          end
+
+          it 'checks absence of efficacy ' do
+            result = target.to_sql(double(value: 'NULL', operator: '<>'))
+            expect(result.sql).to eq('(EXISTS(SELECT 1 FROM alignments WHERE alignments.resource_id = resources.id))')
+            expect(result.sql_params.keys.count).to eq(0)
+          end
+        end
 
         context 'for other operators' do
           it 'returns 1=0  in sql' do
