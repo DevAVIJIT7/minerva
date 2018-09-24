@@ -41,7 +41,6 @@ module Minerva
                  'Text/Website', 'Media/Audio', 'Media/Video', 'Media/Images', 'Other'] }, allow_nil: true
 
       validates :language, length: { is: 2 }, allow_nil: true
-      validates :typical_age_range, format: { with: /\A\d+-\d+\z/ }, allow_nil: true
       validates :time_required, numericality: { greater_than: 0 }, allow_nil: true
       validate :validate_model
 

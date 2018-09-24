@@ -43,7 +43,6 @@ module Minerva
 
       def perform
         tf = transform(filter, expand_objectives: params.fetch('extensions.expandObjectives', false))
-        joins_sql = (has_fields ? tf[:joins] : all_joins).uniq.join(' ')
 
         if fields.is_a?(Array)
           self.fields = self.fields.join(',')
@@ -64,13 +63,13 @@ module Minerva
       private
 
       def transform(filter, ctx)
+
         return { where: '', joins: [] } if filter.blank?
         clause_string = ''
         joins_string = []
         clause_values   = {}
         query_parse     = Search::Parser.new.parse(filter)
         query_transform = [Search::QueryTransformer.new.apply(query_parse, ctx)].flatten
-
         query_transform.each do |el|
           clause_string += el.sql
           clause_values.merge!(el.sql_params)

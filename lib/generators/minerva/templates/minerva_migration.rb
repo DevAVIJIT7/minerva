@@ -65,7 +65,6 @@ class CreateMinervaTables < MIGRATION_CLASS
       t.citext 'learning_resource_type'
       t.citext 'language', default: 'en'
       t.text 'thumbnail_url'
-      t.string 'typical_age_range', limit: 255
       t.jsonb 'text_complexity', default: {}
       t.citext 'author'
       t.citext 'publisher', null: false
@@ -109,7 +108,6 @@ class CreateMinervaTables < MIGRATION_CLASS
       t.index ['technical_format'], name: 'index_resources_technical_format'
       t.index ['time_required'], name: 'index_resources_time_required'
       t.index ['tsv_text'], name: 'index_resources_on_tsv_text_gin', using: :gin
-      t.index ['typical_age_range'], name: 'index_resources_typical_age_range'
     end
 
     create_table 'resources_subjects', id: :serial, force: :cascade do |t|
@@ -140,6 +138,8 @@ class CreateMinervaTables < MIGRATION_CLASS
       t.citext 'identifier'
       t.datetime 'created_at', null: false
       t.datetime 'updated_at', null: false
+      t.integer 'min_age'
+      t.integer 'max_age'
       t.citext 'description'
       t.string 'ancestry'
       t.string 'alignment_type'
@@ -149,6 +149,8 @@ class CreateMinervaTables < MIGRATION_CLASS
       t.citext 'opensalt_identifier'
       t.index 'identifier gin_trgm_ops', name: 'index_taxonomy_on_identifier_gin', using: :gin
       t.index ['ancestry'], name: 'index_taxonomy_on_ancestry'
+      t.index ['min_age'], name: 'index_taxonomies_on_min_age'
+      t.index ['max_age'], name: 'index_taxonomies_on_max_age'
       t.index ['description'], name: 'index_taxonomies_on_description'
       t.index ['identifier'], name: 'index_taxonomies_on_name'
       t.index ['opensalt_identifier'], name: 'index_taxonomies_on_opensalt_identifier'

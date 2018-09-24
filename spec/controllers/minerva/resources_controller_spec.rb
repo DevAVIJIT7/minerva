@@ -25,7 +25,7 @@ module Minerva
       FactoryBot.create(
         :game,
         publisher: 'publisher', name: 'test',
-        typical_age_range: '6-7', use_rights_url: 'http://use_rights_url.com',
+        use_rights_url: 'http://use_rights_url.com',
         accessibility_input_methods: ['fullMouseControl'],
         access_mode: %w[orientation color textOnImage position visual]
       )
@@ -44,7 +44,7 @@ module Minerva
         data = { name: 'AP / AB Calculus Test - Sample Questions 13 & 14', description: 'description',
                  url: 'https://www.youtube.com/embed/O9V2Bvysvs0', learning_resource_type: 'Media/Video', language: 'en',
                  thumbnail_url: 'https://images-staging.opened.com/pictures/1890960/image20170920-4-1ckjl84.jpg?1505872718',
-                 typical_age_range: '0-12', text_complexity: { 'flesch-kincaid' => '1', 'lexile' => '2' },
+                 text_complexity: { 'flesch-kincaid' => '1', 'lexile' => '2' },
                  author: '', publisher: 'patrickJMT', use_rights_url: 'some_url', time_required: 278.0, technical_format: 'text', extensions: {},
                  rating: 3.0, relevance: 0.0,
                  lti_link: { 'title' => 'https://www.opened.io/resources/1890960', 'launch_url' => 'https://www.opened.io/resources/1890960',
@@ -569,11 +569,55 @@ module Minerva
           end
 
           context 'searches by typicalAgeRange' do
-            it 'returns some resources' do
+            before do
+              t = FactoryBot.create(:taxonomy, identifier: 'CCSS.Math.Content.2.G.A.1', min_age: 6, max_age: 7)
+              FactoryBot.create(:alignment, resource: resource, taxonomy: t)
+            end
+
+            it 'returns some resources with direct match' do
               params.merge!(limit: 1, filter: 'typicalAgeRange="6-7"')
               action.call
               expect(json_response['resources'].count).to eq(1)
               expect(json_response['resources'][0]['typicalAgeRange']).to eq('6-7')
+            end
+
+            it 'returns some resources with min_age match' do
+              params.merge!(limit: 1, filter: 'typicalAgeRange="6"')
+              action.call
+              expect(json_response['resources'].count).to eq(1)
+              expect(json_response['resources'][0]['typicalAgeRange']).to eq('6-7')
+            end
+
+            it 'returns some resources with max_age match' do
+              params.merge!(limit: 1, filter: 'typicalAgeRange="7"')
+              action.call
+              expect(json_response['resources'].count).to eq(1)
+              expect(json_response['resources'][0]['typicalAgeRange']).to eq('6-7')
+            end
+
+            it 'returns some resources with wider interval' do
+              params.merge!(limit: 1, filter: 'typicalAgeRange="5-8"')
+              action.call
+              expect(json_response['resources'].count).to eq(1)
+              expect(json_response['resources'][0]['typicalAgeRange']).to eq('6-7')
+            end
+
+            it 'doent returns resources for typicalAgeRange="4-5"' do
+              params.merge!(limit: 1, filter: 'typicalAgeRange="4-5"')
+              action.call
+              expect(json_response['resources'].count).to eq(0)
+            end
+
+            it 'doent returns resources for typicalAgeRange="5"' do
+              params.merge!(limit: 1, filter: 'typicalAgeRange="5"')
+              action.call
+              expect(json_response['resources'].count).to eq(0)
+            end
+
+            it 'doent returns resources for typicalAgeRange="8"' do
+              params.merge!(limit: 1, filter: 'typicalAgeRange="8"')
+              action.call
+              expect(json_response['resources'].count).to eq(0)
             end
           end
 
@@ -651,7 +695,7 @@ module Minerva
               'thumbnailUrl' => nil,
               'typicalAgeRange' => '6-7',
               'textComplexity' => [{ 'name' => 'Flesch-Kincaid', 'value' => '' }, { 'name' => 'Lexile', 'value' => '' }],
-              'learningObjectives' => [],
+              'learningObjectives' => [{"alignmentType"=>"teaches", "caseItemGUID"=>"", "caseItemUri"=>"", "targetDescription"=>resource.taxonomies.first.description, "targetName"=>resource.taxonomies.first.identifier}],
               'author' => [],
               'publisher' => 'publisher',
               'useRightsUrl' => 'http://use_rights_url.com',
@@ -674,6 +718,9 @@ module Minerva
           end
 
           it 'returns resources with all fields' do
+            t = FactoryBot.create(:taxonomy, identifier: 'CCSS.Math.Content.2.G.A.1', min_age: 6, max_age: 7)
+            FactoryBot.create(:alignment, resource: resource, taxonomy: t)
+
             fields = Minerva::Search::FieldMap.instance.field_map.map { |_k, v| v.output_field }.uniq.compact.join(',')
             params.merge!(limit: 1, fields: fields)
             action.call
@@ -760,7 +807,7 @@ module Minerva
             expect(response).to be_successful
             expect(json_response['resources'].count).to eq(1)
             expect(json_response['Severity']).to eq('warning')
-            expect(json_response['Description']).to eq('Use any of name, description, publisher, learningResourceType, language, typicalAgeRange, rating, publishDate, timeRequired, author for sorting parameter')
+            expect(json_response['Description']).to eq('Use any of name, description, publisher, learningResourceType, language, rating, publishDate, timeRequired, author for sorting parameter')
           end
 
           specify 'for wrong orderBy (should be asc/desc)' do

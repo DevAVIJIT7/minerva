@@ -17,7 +17,7 @@
 module Minerva
   class ResourceEditSerializer < ActiveModel::Serializer
     attributes  :name, :description, :url, :learning_resource_type, :language, :thumbnail_url,
-                :typical_age_range, :text_complexity, :author, :publisher, :use_rights_url, :time_required, :technical_format, :extensions,
+                :text_complexity, :author, :publisher, :use_rights_url, :time_required, :technical_format, :extensions,
                 :rating, :relevance, :lti_link, :educational_audience, :accessibility_api, :accessibility_input_methods,
                 :accessibility_features, :accessibility_hazards, :access_mode
 

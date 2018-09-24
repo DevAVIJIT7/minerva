@@ -26,6 +26,11 @@ module Minerva
       TEXT_COMPLEXITY_SELECT = "jsonb_build_array(json_build_object('name', 'Flesch-Kincaid', 'value', resources.text_complexity->>'flesch_kincaid'), json_build_object('name', 'Lexile', 'value', resources.text_complexity->>'lexile'))"
       EFFICACY_SELECT = '(select json_agg(CASE WHEN resource_stats.taxonomy_ident IS NOT NULL THEN json_build_object(resource_stats.taxonomy_ident, resource_stats.effectiveness) ELSE \'{}\'::json END) from resource_stats WHERE resource_stats.resource_id = resources.id)'
       SUBJECT_SELECT = '(select array_agg(subjects.name) from subjects INNER JOIN resources_subjects ON resources_subjects.subject_id = subjects.id AND resources_subjects.resource_id = resources.id)'
+      AGE_RANGE_SELECT = "(WITH T AS (SELECT MAX(least(12, taxonomies.max_age)) as max_age, MIN(taxonomies.min_age) as min_age FROM taxonomies INNER JOIN alignments on taxonomies.id = alignments.taxonomy_id WHERE alignments.resource_id = resources.id)
+                         (SELECT CASE WHEN T.min_age IS NULL THEN T.max_age::text
+                                      WHEN T.max_age IS NULL THEN T.min_age::text
+                                      ELSE concat_ws('-', T.min_age, T.max_age)
+                                      END FROM T))"
 
       ALL_CLASSES = [Minerva::Resources::Resource, Minerva::Alignments::ResourceStat, Minerva::Subject, Minerva::Alignments::Taxonomy].freeze
 
@@ -71,7 +76,7 @@ module Minerva
           FieldTypes::LearningObjective.new('learningObjectives.caseItemUri', TAXONOMIES_SELECT, :learningObjectives, as_option: :learning_objectives, query_field: 'taxonomies.source'),
           FieldTypes::CaseInsensitiveString.new('learningResourceType', 'resources.learning_resource_type', :learningResourceType, as_option: :learning_resource_type, is_sortable: true),
           FieldTypes::CaseInsensitiveString.new('language', 'resources.language', :language, is_sortable: true),
-          FieldTypes::CaseInsensitiveString.new('typicalAgeRange', 'resources.typical_age_range', :typicalAgeRange, as_option: :typical_age_range, is_sortable: true),
+          FieldTypes::TypicalAgeRange.new('typicalAgeRange', AGE_RANGE_SELECT, :typicalAgeRange, as_option: :typical_age_range, query_field: nil),
           FieldTypes::CaseInsensitiveString.new('rating', 'resources.rating', :rating, is_sortable: true),
           FieldTypes::Timestamp.new('publishDate', 'resources.created_at', :publishDate, as_option: :created_at, is_sortable: true),
           FieldTypes::Duration.new('timeRequired', 'resources.time_required', :timeRequired, as_option: :time_required, is_sortable: true),
