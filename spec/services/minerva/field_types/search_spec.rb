@@ -19,21 +19,20 @@ require 'rails_helper'
 module Minerva
   describe FieldTypes::Search do
     let(:target) do
-      FieldTypes::Search.new('search', nil, nil,
-                             joins: ['LEFT OUTER JOIN alignments on alignments.resource_id = resources.id', 'LEFT OUTER JOIN taxonomies on taxonomies.id = alignments.taxonomy_id'])
+      FieldTypes::Search.new('search', nil, nil)
     end
 
     describe '#to_sql' do
       context 'null check' do
         specify 'NULL' do
           result = target.to_sql(double(value: 'NULL', operator: '='))
-          expect(result.sql).to eq('resources.tsv_text IS NULL AND taxonomies.name IS NULL')
+          expect(result.sql).to eq('resources.tsv_text IS NULL AND NOT EXISTS(SELECT 1 FROM alignments WHERE alignments.resource_id = resources.id)')
           expect(result.sql_params.keys.count).to eq(0)
         end
 
         specify 'NOT NULL' do
           result = target.to_sql(double(value: 'NULL', operator: '<>'))
-          expect(result.sql).to eq('resources.tsv_text IS NOT NULL OR taxonomies.name IS NOT NULL')
+          expect(result.sql).to eq('resources.tsv_text IS NOT NULL OR EXISTS(SELECT 1 FROM alignments WHERE alignments.resource_id = resources.id)')
           expect(result.sql_params.keys.count).to eq(0)
         end
       end

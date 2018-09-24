@@ -63,7 +63,6 @@ module Minerva
       private
 
       def transform(filter, ctx)
-
         return { where: '', joins: [] } if filter.blank?
         clause_string = ''
         joins_string = []

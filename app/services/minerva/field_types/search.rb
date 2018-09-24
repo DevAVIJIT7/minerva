@@ -24,9 +24,9 @@ module Minerva
         sql_params = {}
         query = if null_check(clause)
                   if clause.operator == '<>'
-                    'resources.tsv_text IS NOT NULL OR taxonomies.name IS NOT NULL'
+                    'resources.tsv_text IS NOT NULL OR EXISTS(SELECT 1 FROM alignments WHERE alignments.resource_id = resources.id)'
                   else
-                    'resources.tsv_text IS NULL AND taxonomies.name IS NULL'
+                    'resources.tsv_text IS NULL AND NOT EXISTS(SELECT 1 FROM alignments WHERE alignments.resource_id = resources.id)'
                   end
                 else
                   pre_params = SqlParam.from(tsv_text: val, taxonomies_name: val)

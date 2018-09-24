@@ -126,15 +126,6 @@ module Minerva
             end
 
             context "when operator is '~'" do
-              context "for search term 'search'" do
-                it 'tests exact match' do
-                  params.merge!(limit: 1, filter: "search~'test'")
-                  action.call
-                  expect(json_response['resources'].map { |el| el['name'] })
-                    .to eq(['test'])
-                end
-              end
-
               context 'for case-insensitive fields' do
                 it 'tests similarity' do
                   params.merge!(limit: 1, filter: "name~'TeS'")
@@ -143,6 +134,22 @@ module Minerva
                     .to eq(['test'])
                 end
               end
+            end
+          end
+
+
+          describe 'filtering by "search"' do
+            specify "operator is '~'" do
+              params.merge!(limit: 1, filter: "search~'test'")
+              action.call
+              expect(json_response['resources'].map { |el| el['name'] })
+                  .to eq(['test'])
+            end
+
+            specify "NULL case" do
+              params.merge!(limit: 1, filter: "search!='NULL'")
+              action.call
+              expect(json_response['resources'].count).to eq(1)
             end
           end
 
