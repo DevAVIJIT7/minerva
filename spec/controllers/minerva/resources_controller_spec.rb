@@ -115,35 +115,85 @@ module Minerva
 
       context 'authorized user request' do
         describe 'filter' do
-          context 'search operators in filter params' do
-            context "when operator is '='" do
-              it 'tests equality' do
-                params.merge!(limit: 1, filter: "name='test'")
-                action.call
-                expect(json_response['resources'].map { |el| el['name'] })
-                  .to eq(['test'])
-              end
-            end
-
-            context "when operator is '~'" do
-              context 'for case-insensitive fields' do
-                it 'tests similarity' do
-                  params.merge!(limit: 1, filter: "name~'TeS'")
-                  action.call
-                  expect(json_response['resources'].map { |el| el['name'] })
-                    .to eq(['test'])
-                end
-              end
-            end
-          end
-
-
-          describe 'filtering by "search"' do
-            specify "operator is '~'" do
-              params.merge!(limit: 1, filter: "search~'test'")
+          describe 'filtering by "name"' do
+            it 'tests equality' do
+              params.merge!(limit: 1, filter: "name='test'")
               action.call
               expect(json_response['resources'].map { |el| el['name'] })
                   .to eq(['test'])
+            end
+
+            it 'tests similarity' do
+              params.merge!(limit: 1, filter: "name~'TeS'")
+              action.call
+              expect(json_response['resources'].map { |el| el['name'] })
+                  .to eq(['test'])
+            end
+
+            specify 'name = NULL' do
+              params.merge!(limit: 1, filter: "name='NULL'")
+              action.call
+              expect(json_response['resources'].count).to eq(0)
+            end
+
+            specify 'name != NULL' do
+              params.merge!(limit: 1, filter: "name!='NULL'")
+              action.call
+              expect(json_response['resources'].count).to eq(1)
+            end
+
+            it 'returns blank results if no matching resources found' do
+              params.merge!(limit: 1, filter: "name~'math'")
+              action.call
+              expect(json_response['resources'].count).to eq(0)
+            end
+          end
+
+          describe 'filtering by "search"' do
+            specify "~ operator" do
+              params.merge!(limit: 1, filter: "search~'test'")
+              action.call
+              expect(json_response['resources'].count).to eq(1)
+            end
+
+            specify "= operator" do
+              params.merge!(limit: 1, filter: "search='test'")
+              action.call
+              expect(json_response['resources'].count).to eq(1)
+            end
+
+            context "taxonomy search" do
+              specify "= operator, searching by taxonomy" do
+                FactoryBot.create(:alignment, resource: resource, taxonomy:
+                    FactoryBot.create(:taxonomy, identifier: 'CCSS.Math.Content.2.G.A.1'))
+                params.merge!(limit: 1, filter: "search='CCSS.Math.Content.2.G.A.1'")
+                action.call
+                expect(json_response['resources'].count).to eq(1)
+              end
+
+              specify "= operator, searching by taxonomy, blank results " do
+                FactoryBot.create(:alignment, resource: resource, taxonomy:
+                    FactoryBot.create(:taxonomy, identifier: 'CCSS.Math.Content.2.G.A.1'))
+                params.merge!(limit: 1, filter: "search='CCSS.Math.Content.2.G.A.2'")
+                action.call
+                expect(json_response['resources'].count).to eq(0)
+              end
+
+              specify "= operator, register independent" do
+                FactoryBot.create(:alignment, resource: resource, taxonomy:
+                    FactoryBot.create(:taxonomy, identifier: 'CCSS.Math.Content.2.G.A.1'))
+                params.merge!(limit: 1, filter: "search='CCSS.math.content.2.G.A.1'")
+                action.call
+                expect(json_response['resources'].count).to eq(1)
+              end
+
+              specify "= operator, searches by taxonomy title" do
+                FactoryBot.create(:alignment, resource: resource, taxonomy:
+                    FactoryBot.create(:taxonomy, identifier: 'CCSS.Math.Content.2.G.A.1', name: 'math'))
+                params.merge!(limit: 1, filter: "search='math'")
+                action.call
+                expect(json_response['resources'].count).to eq(1)
+              end
             end
 
             specify "NULL case" do
@@ -176,6 +226,13 @@ module Minerva
               params.merge!(fields: 'subject', filter: "subject~'Data'")
               action.call
               expect(json_response['resources'][0]['subject']).to match_array(['Measurement & Data'])
+            end
+
+            it 'case insensitive search' do
+              resource.subjects << FactoryBot.create(:subject, name: 'Some Subject')
+              params.merge!(fields: 'subject', filter: "subject='some subject'")
+              action.call
+              expect(json_response['resources'][0]['subject']).to match_array(['Some Subject'])
             end
           end
 
@@ -385,6 +442,14 @@ module Minerva
                 params.merge!(limit: 1, filter: "#{f}!='NULL'")
                 action.call
                 expect(json_response['resources'].count).to eq(1)
+              end
+            end
+
+            it 'returns blank results' do
+              Search::FieldMap.instance.field_map.select { |x| x.is_a?(FieldTypes::NullField) }.map(&:input_field).each do |f|
+                params.merge!(limit: 1, filter: "#{f}='NULL'")
+                action.call
+                expect(json_response['resources'].count).to eq(0)
               end
             end
           end
