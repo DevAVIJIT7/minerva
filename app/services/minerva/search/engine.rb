@@ -19,7 +19,7 @@ module Minerva
   module Search
     class Engine
       attr_accessor :search, :filter, :all_joins, :limit, :offset, :fields, :sort,
-                    :order_by, :has_fields, :warning, :params
+                    :order_by, :has_fields, :warning, :params, :resource_owner_id
 
       DEFAULT_LIMIT  = 100
       DEFAULT_OFFSET = 0
@@ -27,7 +27,7 @@ module Minerva
       MAX_LIMIT      = 100
       MAX_OFFSET     = 100_000
 
-      def initialize(params)
+      def initialize(params, resource_owner_id = nil)
         sanitizer     = Sanitize.new(fields: params.fetch(:fields, nil), sort: params.fetch(:sort, 'name'), order_by: params.fetch(:orderBy, :asc))
         self.filter   = params.fetch(:filter, '')
         self.limit    = check_value(params[:limit].to_i, DEFAULT_LIMIT, MAX_LIMIT)
@@ -38,6 +38,7 @@ module Minerva
         self.warning  = sanitizer.warning
         self.order_by = sanitizer.order_by if sort.present?
         self.has_fields = sanitizer.has_fields
+        self.resource_owner_id = resource_owner_id
         self.params = params
       end
 
@@ -51,7 +52,12 @@ module Minerva
         resources = Resources::Resource.select("#{fields}").where(tf[:where])
                                        .order("#{sort.query_field} #{order_by}")
 
-        total_count = Resources::Resource.where(tf[:where]).count('resources.id')
+        global_filter = Minerva.configuration.filter_sql_proc.call(resource_owner_id) if Minerva.configuration.filter_sql_proc
+        resources = resources.where(global_filter) if global_filter
+
+        cnt_query = Resources::Resource.where(tf[:where])
+        total_count = (global_filter ? cnt_query.where(global_filter) : cnt_query).count('resources.id')
+
         result = PaginationService.new(resources, total_count).page(limit, offset)
         result.warning = warning
         result
