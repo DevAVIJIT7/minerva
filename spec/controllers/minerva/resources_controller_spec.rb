@@ -162,35 +162,24 @@ module Minerva
               expect(json_response['resources'].count).to eq(1)
             end
 
-            context "taxonomy search" do
+            context "subject search" do
               specify "= operator, searching by taxonomy" do
-                FactoryBot.create(:alignment, resource: resource, taxonomy:
-                    FactoryBot.create(:taxonomy, identifier: 'CCSS.Math.Content.2.G.A.1'))
-                params.merge!(limit: 1, filter: "search='CCSS.Math.Content.2.G.A.1'")
+                FactoryBot.create(:subject, resources: [resource], name: 'Math')
+                params.merge!(limit: 1, filter: "search='Math'")
                 action.call
                 expect(json_response['resources'].count).to eq(1)
               end
 
-              specify "= operator, searching by taxonomy, blank results " do
-                FactoryBot.create(:alignment, resource: resource, taxonomy:
-                    FactoryBot.create(:taxonomy, identifier: 'CCSS.Math.Content.2.G.A.1'))
-                params.merge!(limit: 1, filter: "search='CCSS.Math.Content.2.G.A.2'")
+              specify "= operator, searching by subject, blank results " do
+                FactoryBot.create(:subject, resources: [resource], name: 'Biology')
+                params.merge!(limit: 1, filter: "search='Math'")
                 action.call
                 expect(json_response['resources'].count).to eq(0)
               end
 
               specify "= operator, register independent" do
-                FactoryBot.create(:alignment, resource: resource, taxonomy:
-                    FactoryBot.create(:taxonomy, identifier: 'CCSS.Math.Content.2.G.A.1'))
-                params.merge!(limit: 1, filter: "search='CCSS.math.content.2.G.A.1'")
-                action.call
-                expect(json_response['resources'].count).to eq(1)
-              end
-
-              specify "= operator, searches by taxonomy title" do
-                FactoryBot.create(:alignment, resource: resource, taxonomy:
-                    FactoryBot.create(:taxonomy, identifier: 'CCSS.Math.Content.2.G.A.1', name: 'math'))
-                params.merge!(limit: 1, filter: "search='math'")
+                FactoryBot.create(:subject, resources: [resource], name: 'Geography')
+                params.merge!(limit: 1, filter: "search='geOGraphy'")
                 action.call
                 expect(json_response['resources'].count).to eq(1)
               end

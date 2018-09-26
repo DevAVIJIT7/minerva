@@ -26,13 +26,13 @@ module Minerva
       context 'null check' do
         specify 'NULL' do
           result = target.to_sql(double(value: 'NULL', operator: '='))
-          expect(result.sql).to eq('resources.tsv_text IS NULL AND NOT EXISTS(SELECT 1 FROM alignments WHERE alignments.resource_id = resources.id)')
+          expect(result.sql).to eq('resources.tsv_text IS NULL AND NOT EXISTS(SELECT 1 FROM resources_subjects WHERE resources_subjects.resource_id = resources.id)')
           expect(result.sql_params.keys.count).to eq(0)
         end
 
         specify 'NOT NULL' do
           result = target.to_sql(double(value: 'NULL', operator: '<>'))
-          expect(result.sql).to eq('resources.tsv_text IS NOT NULL OR EXISTS(SELECT 1 FROM alignments WHERE alignments.resource_id = resources.id)')
+          expect(result.sql).to eq('resources.tsv_text IS NOT NULL OR EXISTS(SELECT 1 FROM resources_subjects WHERE resources_subjects.resource_id = resources.id)')
           expect(result.sql_params.keys.count).to eq(0)
         end
       end
@@ -40,19 +40,19 @@ module Minerva
       context 'other operators, not null checks' do
         specify '=' do
           result = target.to_sql(double(value: 'something', operator: '='))
-          expect(result.sql).to match(/\(resources.tsv_text @@ plainto_tsquery\(:tsv_text_\d+\) OR EXISTS\(SELECT 1 FROM taxonomies INNER JOIN alignments ON alignments.taxonomy_id = taxonomies.id WHERE alignments.resource_id = resources.id AND \(taxonomies.name = :taxonomies_name_\d+ OR taxonomies.identifier = :taxonomies_name_\d+\)\)\)/)
+          expect(result.sql).to match(/\(resources.tsv_text @@ plainto_tsquery\(:tsv_text_\d+\) OR EXISTS\(SELECT 1 FROM subjects INNER JOIN resources_subjects ON resources_subjects.subject_id = subjects.id WHERE resources_subjects.resource_id = resources.id AND subjects.name = :subject_name_\d+\)\)/)
           expect(result.sql_params.keys.count).to eq(2)
           result.sql_params.keys.map(&:to_s).select { |x| x.starts_with?('tsv_text_') }.first
           expect(result.sql_params[result.sql_params.keys.map(&:to_s).select { |x| x.starts_with?('tsv_text_') }.first.to_sym]).to eq('something')
-          expect(result.sql_params[result.sql_params.keys.map(&:to_s).select { |x| x.starts_with?('taxonomies_name_') }.first.to_sym]).to eq('something')
+          expect(result.sql_params[result.sql_params.keys.map(&:to_s).select { |x| x.starts_with?('subject_name_') }.first.to_sym]).to eq('something')
         end
 
         specify '!=' do
           result = target.to_sql(double(value: 'something', operator: '<>'))
-          expect(result.sql).to match(/NOT \(resources.tsv_text @@ plainto_tsquery\(:tsv_text_\d+\) OR EXISTS\(SELECT 1 FROM taxonomies INNER JOIN alignments ON alignments.taxonomy_id = taxonomies.id WHERE alignments.resource_id = resources.id AND \(taxonomies.name = :taxonomies_name_\d+ OR taxonomies.identifier = :taxonomies_name_\d+\)\)\)/)
+          expect(result.sql).to match(/NOT \(resources.tsv_text @@ plainto_tsquery\(:tsv_text_\d+\) OR EXISTS\(SELECT 1 FROM subjects INNER JOIN resources_subjects ON resources_subjects.subject_id = subjects.id WHERE resources_subjects.resource_id = resources.id AND subjects.name = :subject_name_\d+\)\)/)
           expect(result.sql_params.keys.count).to eq(2)
           expect(result.sql_params[result.sql_params.keys.map(&:to_s).select { |x| x.starts_with?('tsv_text_') }.first.to_sym]).to eq('something')
-          expect(result.sql_params[result.sql_params.keys.map(&:to_s).select { |x| x.starts_with?('taxonomies_name_') }.first.to_sym]).to eq('something')
+          expect(result.sql_params[result.sql_params.keys.map(&:to_s).select { |x| x.starts_with?('subject_name_') }.first.to_sym]).to eq('something')
         end
       end
     end

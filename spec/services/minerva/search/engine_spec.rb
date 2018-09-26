@@ -24,12 +24,8 @@ module Minerva
     let!(:r3) { FactoryBot.create(:video, name: 'video3', description: 'description3') }
     let!(:r4) { FactoryBot.create(:video, name: 'video4', description: 'description4') }
 
-    let(:taxonomy) { FactoryBot.create :taxonomy, name: 'MySubject1' }
-    let(:r5) do
-      r = FactoryBot.create(:video, name: 'video5', description: 'description5')
-      r.alignments << FactoryBot.create(:alignment, taxonomy: taxonomy, resource: r)
-      r
-    end
+    let(:subject) { FactoryBot.create :subject, name: 'MySubject1' }
+    let(:r5) { FactoryBot.create(:video, name: 'video5', description: 'description5', subjects: [subject]) }
 
     describe '#search' do
       context 'with input valid params' do
