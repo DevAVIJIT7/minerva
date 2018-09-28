@@ -79,6 +79,12 @@ class CreateMinervaTables < MIGRATION_CLASS
       t.citext 'accessibility_hazards', default: [], null: false, array: true
       t.citext 'access_mode', default: [], null: false, array: true
       t.text 'publish_date'
+      t.integer 'direct_taxonomy_ids', default: [], null: false, array: true
+      t.integer 'all_taxonomy_ids', default: [], null: false, array: true
+      t.integer 'resource_stat_ids', default: [], null: false, array: true
+      t.integer 'all_subject_ids', default: [], null: false, array: true
+      t.integer 'min_age'
+      t.integer 'max_age'
       t.float 'rating'
       t.float 'relevance'
       t.tsvector 'tsv_text'
@@ -86,11 +92,6 @@ class CreateMinervaTables < MIGRATION_CLASS
       t.datetime 'updated_at', null: false
       t.index "(((text_complexity ->> 'flesch-kincaid'::text))::double precision)", name: 'text_complexity_flesch-kincaid'
       t.index "(((text_complexity ->> 'lexile'::text))::double precision)", name: 'text_complexity_lexile'
-      t.index 'array_length(access_mode, 1)', name: 'index_resources_on_array_length_of_access_mode'
-      t.index 'array_length(accessibility_features, 1)', name: 'index_resources_on_array_length_of_accessibility_features'
-      t.index 'array_length(accessibility_hazards, 1)', name: 'index_resources_on_array_length_of_accessibility_hazards'
-      t.index 'array_length(accessibility_input_methods, 1)', name: 'index_resources_on_array_length_of_accessibility_input_method'
-      t.index 'array_length(educational_audience, 1)', name: 'index_resources_on_array_length_of_educational_audience'
       t.index 'author gin_trgm_ops', name: 'index_resources_on_author_trgm', using: :gin
       t.index 'description gin_trgm_ops', name: 'index_resources_on_description_trgm', using: :gin
       t.index 'language gin_trgm_ops', name: 'index_resources_on_language_trgm', using: :gin
@@ -98,8 +99,12 @@ class CreateMinervaTables < MIGRATION_CLASS
       t.index 'name gin_trgm_ops, name', name: 'index_resources_on_name_trgm', using: :gin
       t.index 'publisher gin_trgm_ops', name: 'index_resources_on_publisher_trgm', using: :gin
       t.index 'technical_format gin_trgm_ops', name: 'index_resources_on_technical_format_trgm', using: :gin
+      t.index 'direct_taxonomy_ids gin__int_ops', name: 'index_resources_on_direct_taxonomy_ids', using: :gin
+      t.index 'all_taxonomy_ids gin__int_ops', name: 'index_resources_on_all_taxonomy_ids', using: :gin
+      t.index 'resource_stat_ids gin__int_ops', name: 'index_resources_on_resource_stat_ids', using: :gin
       t.index 'use_rights_url gin_trgm_ops', name: 'index_resources_on_use_rights_url_trgm', using: :gin
-      t.index ['author'], name: 'index_resources_author'
+      t.index ['min_age'], name: 'index_resources_min_age'
+      t.index ['max_age'], name: 'index_resources_max_age'
       t.index ['created_at'], name: 'index_resources_on_created_at'
       t.index ['language'], name: 'index_resources_language'
       t.index ['learning_resource_type'], name: 'index_resources_on_learning_resource_type'

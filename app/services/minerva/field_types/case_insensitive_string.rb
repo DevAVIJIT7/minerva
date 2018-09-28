@@ -31,7 +31,7 @@ module Minerva
           else
             "#{query_field} #{clause.operator} :#{unique_field}"
           end
-        SqlResult.new(sql: query, joins: joins, sql_params: { unique_field.to_sym => clause.value })
+        SqlResult.new(sql: query, sql_params: { unique_field.to_sym => clause.value })
       end
     end
   end

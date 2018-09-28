@@ -24,11 +24,11 @@ module Minerva
         load_from_csv(Faraday.get(params[:csv_file_url]).body)
       else
         if params[:subjects].present?
-          params[:subject_ids] = Subject.where(name: params.delete(:subjects)).pluck(:id)
+          params[:subject_ids] = params[:all_subject_ids] = Subject.where(name: params.delete(:subjects)).pluck(:id)
         end
         if params[:taxonomies].present?
-          params[:taxonomy_ids] = Alignments::Taxonomy.where('lower(identifier) in (:terms) OR lower(opensalt_identifier) in (:terms)',
-                                                             terms: params.delete(:taxonomies)).pluck(:id)
+          params[:taxonomy_ids] = params[:direct_taxonomy_ids] = Alignments::Taxonomy.where('lower(identifier) in (:terms) OR lower(opensalt_identifier) in (:terms)',
+                                                                 terms: params.delete(:taxonomies)).pluck(:id)
         end
         [Resources::Resource.create!(params)]
       end

@@ -18,7 +18,7 @@ module Minerva
   module FieldTypes
     class Base
 
-      attr_accessor :joins, :filter_field, :is_sortable, :select_sql,
+      attr_accessor :custom_search, :filter_field, :is_sortable, :select_sql,
                     :as_option, :query_field, :output_field, :search_allowed
 
       def initialize(filter_field, select_sql, output_field, ops = {})
@@ -26,9 +26,9 @@ module Minerva
         self.query_field = ops.fetch(:query_field, select_sql)
         self.select_sql = "#{select_sql} AS #{ops.fetch(:as_option, output_field)}" if select_sql.present?
         self.output_field = output_field
-        self.joins = ops[:joins]
         self.is_sortable = ops.fetch(:is_sortable, false)
         self.search_allowed = ops.fetch(:search_allowed, true)
+        self.custom_search = ops.fetch(:custom_search, false)
       end
 
       def to_sql(_clause, _ops = {})

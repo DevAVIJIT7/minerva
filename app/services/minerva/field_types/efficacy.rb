@@ -20,11 +20,10 @@ module Minerva
   module FieldTypes
     class Efficacy < Base
       def to_sql(clause, _ops = {})
-        exists_sql = "EXISTS(SELECT 1 FROM resource_stats
-                      WHERE resource_stats.resource_id = resources.id)".squish
+        exists_sql = "resource_stat_ids = '{}'".squish
         query =
             if null_check(clause)
-              "#{clause.operator == '<>' ? '' : 'NOT'}(#{exists_sql})"
+              "#{clause.operator == '<>' ? 'NOT' : ''}(#{exists_sql})"
             else
               '1=1'
             end

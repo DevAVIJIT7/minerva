@@ -25,7 +25,7 @@ module Minerva
     let!(:r4) { FactoryBot.create(:video, name: 'video4', description: 'description4') }
 
     let(:subject) { FactoryBot.create :subject, name: 'MySubject1' }
-    let(:r5) { FactoryBot.create(:video, name: 'video5', description: 'description5', subjects: [subject]) }
+    let(:r5) { FactoryBot.create(:video, name: 'video5', description: 'description5', subjects: [subject], all_subject_ids: [subject.id]) }
 
     describe '#search' do
       context 'with input valid params' do

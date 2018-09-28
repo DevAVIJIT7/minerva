@@ -70,7 +70,7 @@ module Minerva
                       .include?(filter_field) # we don't have these in db, so returning 1=0 for sql
                   '1=0'
                 end
-        SqlResult.new(sql: query, joins: joins)
+        SqlResult.new(sql: query)
       end
 
       def prepare_value(clause)
@@ -80,33 +80,7 @@ module Minerva
 
       def check_standard_ids(clause, ops)
         return '1=0' if clause.value.blank?
-
-        join_clause =
-          if ops[:expand_objectives]&.to_bool
-            <<~SQL
-              LEFT OUTER JOIN taxonomy_mappings AS tm
-                ON a.taxonomy_id IN (tm.taxonomy_id, tm.target_id)
-              SQL
-          else
-            ''
-          end
-
-        where_clause =
-          if ops[:expand_objectives]&.to_bool
-            "(ARRAY#{clause.value.split(',').map(&:to_i)} && ARRAY[coalesce(tm.taxonomy_id, -1), coalesce(tm.target_id, -1)] OR a.taxonomy_id IN (#{clause.value}))"
-          else
-            "a.taxonomy_id IN (#{clause.value})"
-          end
-
-        <<~SQL
-          EXISTS(SELECT 1
-            FROM alignments AS a
-            #{join_clause}
-            WHERE #{where_clause}
-              AND a.status = 2
-              AND a.resource_id = resources.id)
-        SQL
-          .squish
+        "(resources.#{ops[:expand_objectives]&.to_bool ? 'all_taxonomy_ids' : 'direct_taxonomy_ids'} && ARRAY[#{clause.value}])"
       end
     end
   end

@@ -29,8 +29,7 @@ module Minerva
               end
             else
               values = clause.value.split('-').map(&:to_i)
-              "(EXISTS(SELECT 1 FROM taxonomies INNER JOIN alignments ON alignments.taxonomy_id = taxonomies.id
-               WHERE alignments.resource_id = resources.id AND (taxonomies.min_age <= #{values.first} AND taxonomies.max_age >= #{values.last} OR taxonomies.min_age >= #{values.first} AND taxonomies.max_age <= #{values.last})))".squish
+              "((resources.min_age <= #{values.first} AND resources.max_age >= #{values.last}) OR (resources.min_age >= #{values.first} AND resources.max_age <= #{values.last}))".squish
             end
         SqlResult.new(sql: query)
       end

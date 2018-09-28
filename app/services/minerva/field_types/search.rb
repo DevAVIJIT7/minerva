@@ -19,25 +19,18 @@ require_relative 'base'
 module Minerva
   module FieldTypes
     class Search < Base
+
       def to_sql(clause, _ops = {})
         val = clause.value.delete('%').downcase
+        unique_field = generate_uniq_field
         sql_params = {}
         query = if null_check(clause)
-                  if clause.operator == '<>'
-                    'resources.tsv_text IS NOT NULL OR EXISTS(SELECT 1 FROM resources_subjects WHERE resources_subjects.resource_id = resources.id)'
-                  else
-                    'resources.tsv_text IS NULL AND NOT EXISTS(SELECT 1 FROM resources_subjects WHERE resources_subjects.resource_id = resources.id)'
-                  end
+                   null_clause(clause)
                 else
-                  pre_params = SqlParam.from(tsv_text: val, subject_name: val)
-                  sql_params = SqlParam.ar_params(pre_params)
-                  "#{clause.operator == '<>' ? 'NOT ' : ''}(resources.tsv_text @@ plainto_tsquery(:#{pre_params[:tsv_text][:uniq_sym]}) OR
-                  EXISTS(SELECT 1 FROM subjects INNER JOIN resources_subjects ON resources_subjects.subject_id = subjects.id
-                  WHERE resources_subjects.resource_id = resources.id AND
-                  subjects.name = :#{pre_params[:subject_name][:uniq_sym]}))".squish
+                  sql_params = { unique_field.to_sym => val }
+                  "#{clause.operator == '<>' ? 'NOT ' : ''}(resources.tsv_text @@ plainto_tsquery(:#{unique_field}))"
                 end
-
-        SqlResult.new(sql: query, joins: joins, sql_params: sql_params)
+        SqlResult.new(sql: query, sql_params: sql_params)
       end
     end
   end

@@ -30,13 +30,13 @@ module Minerva
       context 'null check' do
         it 'checks presence of efficacy ' do
           result = target.to_sql(double(value: 'NULL', operator: '='))
-          expect(result.sql).to eq('NOT(EXISTS(SELECT 1 FROM resource_stats WHERE resource_stats.resource_id = resources.id))')
+          expect(result.sql).to eq("(resource_stat_ids = '{}')")
           expect(result.sql_params.keys.count).to eq(0)
         end
 
         it 'checks absence of efficacy ' do
           result = target.to_sql(double(value: 'NULL', operator: '<>'))
-          expect(result.sql).to eq('(EXISTS(SELECT 1 FROM resource_stats WHERE resource_stats.resource_id = resources.id))')
+          expect(result.sql).to eq("NOT(resource_stat_ids = '{}')")
           expect(result.sql_params.keys.count).to eq(0)
         end
       end

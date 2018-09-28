@@ -22,20 +22,19 @@ module Minerva
 
       attr_accessor :minerva_map
 
-      TAXONOMIES_SELECT = "(select json_agg(json_build_object('id', taxonomies.id, 'opensalt_identifier', COALESCE(taxonomies.opensalt_identifier, ''), 'description', COALESCE(taxonomies.description, ''), 'alignment_type', COALESCE(taxonomies.alignment_type, ''), 'source', COALESCE(taxonomies.source, ''), 'identifier', COALESCE(taxonomies.identifier, ''))) FROM taxonomies INNER JOIN alignments on taxonomies.id = alignments.taxonomy_id WHERE alignments.resource_id = resources.id)"
+      TAXONOMIES_SELECT = "(select json_agg(json_build_object('id', taxonomies.id, 'opensalt_identifier', COALESCE(taxonomies.opensalt_identifier, ''), 'description', COALESCE(taxonomies.description, ''), 'alignment_type', COALESCE(taxonomies.alignment_type, ''), 'source', COALESCE(taxonomies.source, ''), 'identifier', COALESCE(taxonomies.identifier, ''))) FROM taxonomies WHERE id = ANY(resources.direct_taxonomy_ids))"
       TEXT_COMPLEXITY_SELECT = "jsonb_build_array(json_build_object('name', 'Flesch-Kincaid', 'value', resources.text_complexity->>'flesch_kincaid'), json_build_object('name', 'Lexile', 'value', resources.text_complexity->>'lexile'))"
-      EFFICACY_SELECT = '(select json_agg(CASE WHEN resource_stats.taxonomy_ident IS NOT NULL THEN json_build_object(resource_stats.taxonomy_ident, resource_stats.effectiveness) ELSE \'{}\'::json END) from resource_stats WHERE resource_stats.resource_id = resources.id)'
-      SUBJECT_SELECT = '(select array_agg(subjects.name) from subjects INNER JOIN resources_subjects ON resources_subjects.subject_id = subjects.id AND resources_subjects.resource_id = resources.id)'
-      AGE_RANGE_SELECT = "(WITH T AS (SELECT MAX(least(12, taxonomies.max_age)) as max_age, MIN(taxonomies.min_age) as min_age FROM taxonomies INNER JOIN alignments on taxonomies.id = alignments.taxonomy_id WHERE alignments.resource_id = resources.id)
-                         (SELECT CASE WHEN T.min_age IS NULL THEN T.max_age::text
-                                      WHEN T.max_age IS NULL THEN T.min_age::text
-                                      ELSE concat_ws('-', T.min_age, T.max_age)
-                                      END FROM T))"
+      EFFICACY_SELECT = '(select json_agg(CASE WHEN resource_stats.taxonomy_ident IS NOT NULL THEN json_build_object(resource_stats.taxonomy_ident, resource_stats.effectiveness) ELSE \'{}\'::json END) from resource_stats WHERE id = ANY(resources.resource_stat_ids))'
+      SUBJECT_SELECT = '(select array_agg(subjects.name) from subjects WHERE id = ANY(resources.all_subject_ids))'
+      AGE_RANGE_SELECT = "(SELECT CASE WHEN resources.min_age IS NULL THEN least(12, resources.max_age)::text
+                                      WHEN resources.max_age IS NULL THEN resources.min_age::text
+                                      ELSE concat_ws('-', resources.min_age, least(12, resources.max_age))
+                                      END)"
 
       ALL_CLASSES = [Minerva::Resources::Resource, Minerva::Alignments::ResourceStat, Minerva::Subject, Minerva::Alignments::Taxonomy].freeze
 
       def generate_field_map
-        minerva_map.select { |x| x.query_field.nil? || @available_columns.include?(x.query_field) }.index_by(&:filter_field)
+        minerva_map.select { |x| x.custom_search || @available_columns.include?(x.query_field) }.index_by(&:filter_field)
       end
 
       def field_map
@@ -60,23 +59,23 @@ module Minerva
         end
 
         @minerva_map = [
-          FieldTypes::Search.new('search', nil, nil),
+          FieldTypes::Search.new('search', nil, nil, query_field: 'tsv_text', custom_search: true),
           FieldTypes::CaseInsensitiveString.new('name', 'resources.name', :name, is_sortable: true),
           FieldTypes::CaseInsensitiveString.new('description', 'resources.description', :description, is_sortable: true),
           FieldTypes::CaseInsensitiveString.new('publisher', 'resources.publisher', :publisher, is_sortable: true),
-          FieldTypes::Subject.new('subject', SUBJECT_SELECT, :subject, query_field: 'subjects.name'),
+          FieldTypes::Subject.new('subject', SUBJECT_SELECT, :subject, query_field: 'all_subject_ids', custom_search: true),
           FieldTypes::Efficacy.new('efficacy', EFFICACY_SELECT, :efficacy,  query_field: 'resource_stats.effectiveness'),
           FieldTypes::LearningObjective.new('learningObjectives', TAXONOMIES_SELECT, :learningObjectives, query_field: 'taxonomies.identifier', as_option: :learning_objectives),
           FieldTypes::LearningObjective.new('learningObjectives.targetName', TAXONOMIES_SELECT, :learningObjectives, as_option: :learning_objectives, query_field: 'taxonomies.identifier'),
           FieldTypes::LearningObjective.new('learningObjectives.caseItemGUID', TAXONOMIES_SELECT, :learningObjectives, as_option: :learning_objectives, query_field: 'taxonomies.opensalt_identifier'),
           FieldTypes::LearningObjective.new('learningObjectives.alignmentType', TAXONOMIES_SELECT, :learningObjectives, as_option: :learning_objectives, query_field: 'taxonomies.alignment_type'),
           FieldTypes::LearningObjective.new('learningObjectives.targetDescription', TAXONOMIES_SELECT, :learningObjectives, as_option: :learning_objectives, query_field: 'taxonomies.description'),
-          FieldTypes::LearningObjective.new('learningObjectives.targetURL', TAXONOMIES_SELECT, :learningObjectives, as_option: :learning_objectives, query_field: nil),
-          FieldTypes::LearningObjective.new('learningObjectives.educationalFramework', TAXONOMIES_SELECT, :learningObjectives, as_option: :learning_objectives, query_field: nil),
+          FieldTypes::LearningObjective.new('learningObjectives.targetURL', TAXONOMIES_SELECT, :learningObjectives, as_option: :learning_objectives, custom_search: true),
+          FieldTypes::LearningObjective.new('learningObjectives.educationalFramework', TAXONOMIES_SELECT, :learningObjectives, as_option: :learning_objectives, custom_search: true),
           FieldTypes::LearningObjective.new('learningObjectives.caseItemUri', TAXONOMIES_SELECT, :learningObjectives, as_option: :learning_objectives, query_field: 'taxonomies.source'),
           FieldTypes::CaseInsensitiveString.new('learningResourceType', 'resources.learning_resource_type', :learningResourceType, as_option: :learning_resource_type, is_sortable: true),
           FieldTypes::CaseInsensitiveString.new('language', 'resources.language', :language, is_sortable: true),
-          FieldTypes::TypicalAgeRange.new('typicalAgeRange', AGE_RANGE_SELECT, :typicalAgeRange, as_option: :typical_age_range, query_field: nil),
+          FieldTypes::TypicalAgeRange.new('typicalAgeRange', AGE_RANGE_SELECT, :typicalAgeRange, as_option: :typical_age_range, custom_search: true),
           FieldTypes::CaseInsensitiveString.new('rating', 'resources.rating', :rating, is_sortable: true),
           FieldTypes::Timestamp.new('publishDate', 'resources.created_at', :publishDate, as_option: :created_at, is_sortable: true),
           FieldTypes::Duration.new('timeRequired', 'resources.time_required', :timeRequired, as_option: :time_required, is_sortable: true),
@@ -95,7 +94,7 @@ module Minerva
           FieldTypes::StringArray.new('accessibilityHazards', 'resources.accessibility_hazards', :accessibilityHazards, as_option: :accessibility_hazards),
           FieldTypes::CaseInsensitiveString.new('extensions', 'resources.extensions', :extensions),
           FieldTypes::CaseInsensitiveString.new('relevance', 'resources.relevance', :relevance),
-          FieldTypes::NullField.new('ltiLink', 'resources.lti_link', :ltiLink, as_option: :lti_link, search_allowed: false, query_field: nil),
+          FieldTypes::NullField.new('ltiLink', 'resources.lti_link', :ltiLink, as_option: :lti_link, search_allowed: false, custom_search: true),
           FieldTypes::CaseInsensitiveString.new('url', 'resources.url', :url, search_allowed: false)
         ] + (Minerva.configuration.extension_fields || [])
       end

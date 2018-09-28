@@ -18,7 +18,7 @@ require 'parslet'
 module Minerva
   module Search
     class Engine
-      attr_accessor :search, :filter, :all_joins, :limit, :offset, :fields, :sort,
+      attr_accessor :search, :filter, :limit, :offset, :fields, :sort,
                     :order_by, :has_fields, :warning, :params, :resource_owner_id
 
       DEFAULT_LIMIT  = 100
@@ -34,7 +34,6 @@ module Minerva
         self.offset   = check_value(params[:offset].to_i, DEFAULT_OFFSET, MAX_OFFSET)
         self.fields   = sanitizer.fields
         self.sort     = sanitizer.sort
-        self.all_joins = FieldMap.instance.field_map.values.map(&:joins).flatten
         self.warning  = sanitizer.warning
         self.order_by = sanitizer.order_by if sort.present?
         self.has_fields = sanitizer.has_fields
@@ -54,13 +53,13 @@ module Minerva
 
         global_filter = Minerva.configuration.filter_sql_proc.call(resource_owner_id) if Minerva.configuration.filter_sql_proc
         resources = resources.where(global_filter) if global_filter
-
         cnt_query = Resources::Resource.where(tf[:where])
-        total_count = (global_filter ? cnt_query.where(global_filter) : cnt_query).count('resources.id')
+        total_count = (global_filter ? cnt_query.where(global_filter) : cnt_query).count
 
         result = PaginationService.new(resources, total_count).page(limit, offset)
         result.warning = warning
         result
+
       rescue Parslet::ParseFailed
         raise Errors::LtiSearchError.new(CodeMajor: :failure, Severity: :error, CodeMinor: :invalid_data,
                                          Description: 'Wrong filter parameter')
@@ -69,7 +68,7 @@ module Minerva
       private
 
       def transform(filter, ctx)
-        return { where: '', joins: [] } if filter.blank?
+        return { where: '' } if filter.blank?
         clause_string = ''
         joins_string = []
         clause_values   = {}
@@ -81,7 +80,7 @@ module Minerva
           joins_string << (el.joins || '')
         end
 
-        { where: [clause_string, clause_values], joins: joins_string }
+        { where: [clause_string, clause_values] }
       end
 
       def check_value(value, default, max)

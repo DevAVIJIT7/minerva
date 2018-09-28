@@ -27,7 +27,7 @@ shared_examples 'learning_objectives_expand_objectives' do
         new_value = defined?(value2) ? value2 : value
         expect(Minerva::Alignments::Taxonomy).to receive(:where).with(where_clause, value).and_return(taxonomy_pluck)
         result = target.to_sql(OpenStruct.new(value: new_value, operator: '='), expand_objectives: 'true')
-        expect(result.sql).to eq('EXISTS(SELECT 1 FROM alignments AS a LEFT OUTER JOIN taxonomy_mappings AS tm ON a.taxonomy_id IN (tm.taxonomy_id, tm.target_id) WHERE (ARRAY[1, 2, 3] && ARRAY[coalesce(tm.taxonomy_id, -1), coalesce(tm.target_id, -1)] OR a.taxonomy_id IN (1,2,3)) AND a.status = 2 AND a.resource_id = resources.id)')
+        expect(result.sql).to eq('(resources.all_taxonomy_ids && ARRAY[1,2,3])')
         expect(result.sql_params.keys.count).to eq(0)
       end
     end

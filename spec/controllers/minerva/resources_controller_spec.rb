@@ -163,22 +163,22 @@ module Minerva
             end
 
             context "subject search" do
-              specify "= operator, searching by taxonomy" do
-                FactoryBot.create(:subject, resources: [resource], name: 'Math')
+              specify "= operator, searching by subject" do
+                resource.update(all_subject_ids: [FactoryBot.create(:subject, resources: [resource], name: 'Math').id])
                 params.merge!(limit: 1, filter: "search='Math'")
                 action.call
                 expect(json_response['resources'].count).to eq(1)
               end
 
               specify "= operator, searching by subject, blank results " do
-                FactoryBot.create(:subject, resources: [resource], name: 'Biology')
+                resource.update(all_subject_ids: [FactoryBot.create(:subject, resources: [resource], name: 'Biology').id])
                 params.merge!(limit: 1, filter: "search='Math'")
                 action.call
                 expect(json_response['resources'].count).to eq(0)
               end
 
               specify "= operator, register independent" do
-                FactoryBot.create(:subject, resources: [resource], name: 'Geography')
+                resource.update(all_subject_ids: [FactoryBot.create(:subject, resources: [resource], name: 'Geography').id])
                 params.merge!(limit: 1, filter: "search='geOGraphy'")
                 action.call
                 expect(json_response['resources'].count).to eq(1)
@@ -197,6 +197,7 @@ module Minerva
               params[:limit] = 1
               resource.subjects << FactoryBot.create(:subject, name: 'Measurement & Data')
               resource.subjects << FactoryBot.create(:subject, name: 'Math')
+              resource.update(all_subject_ids: resource.subject_ids)
               params.merge!(fields: 'subject', filter: "subject='Measurement & Data'")
               action.call
               expect(json_response['resources'][0]['subject']).to match_array(['Measurement & Data', 'Math'])
@@ -205,6 +206,7 @@ module Minerva
             it 'returns not null subject array' do
               params[:limit] = 1
               resource.subjects << FactoryBot.create(:subject, name: 'Math')
+              resource.update(all_subject_ids: resource.subject_ids)
               params.merge!(fields: 'subject', filter: "subject!='null'")
               action.call
               expect(json_response['resources'][0]['subject']).to match_array(%w[Math])
@@ -212,6 +214,7 @@ module Minerva
 
             it 'allows for searching sub-name' do
               resource.subjects << FactoryBot.create(:subject, name: 'Measurement & Data')
+              resource.update(all_subject_ids: resource.subject_ids)
               params.merge!(fields: 'subject', filter: "subject~'Data'")
               action.call
               expect(json_response['resources'][0]['subject']).to match_array(['Measurement & Data'])
@@ -219,6 +222,7 @@ module Minerva
 
             it 'case insensitive search' do
               resource.subjects << FactoryBot.create(:subject, name: 'Some Subject')
+              resource.update(all_subject_ids: resource.subject_ids)
               params.merge!(fields: 'subject', filter: "subject='some subject'")
               action.call
               expect(json_response['resources'][0]['subject']).to match_array(['Some Subject'])
@@ -229,6 +233,7 @@ module Minerva
             before(:each) do
               FactoryBot.create(:resource_stat, resource: resource)
               FactoryBot.create(:resource_stat, resource: resource)
+              resource.update(resource_stat_ids: Alignments::ResourceStat.where(resource_id: resource.id).pluck(:id))
             end
 
             it 'returns efficacy' do
@@ -239,7 +244,8 @@ module Minerva
               params.merge!(limit: 1, filter: "efficacy!='NULL'")
               action.call
 
-              stats = Alignments::ResourceStat.pluck(:taxonomy_ident, :effectiveness).map { |el| [el].to_h }
+              stats = Alignments::ResourceStat.where(resource_id: resource.id)
+                          .pluck(:taxonomy_ident, :effectiveness).map { |el| [el].to_h }
               expect(json_response['resources'][0]['efficacy']).to match_array(stats)
             end
           end
@@ -255,6 +261,10 @@ module Minerva
               s = FactoryBot.create(:taxonomy, identifier: 'CCSS.Math.Content.2.G.A.2', opensalt_identifier: 's2', source: 'https://opensalt.net/uri/s2')
               s.alignments = [FactoryBot.create(:alignment, resource: resource)]
               s
+            end
+
+            before do
+              resource.update(direct_taxonomy_ids: resource.taxonomy_ids)
             end
 
             context 'when filtering on not null' do
@@ -375,6 +385,7 @@ module Minerva
                 it 'searches by mapped taxonomies' do
                   params['extensions.expandObjectives'] = true
                   tax_map
+                  resource.update(all_taxonomy_ids: resource.taxonomy_ids + [taxonomy.id])
                   action.call
                   expect(json_response['resources'].count).to eq(1)
                   expect(json_response['resources'][0]['learningObjectives'].map { |x| x['targetName'] }).to match_array([s1.identifier, s2.identifier])
@@ -383,6 +394,7 @@ module Minerva
                 it 'searches by mapped taxonomies using reverse mapping' do
                   params['extensions.expandObjectives'] = true
                   reversed_tax_map
+                  resource.update(all_taxonomy_ids: resource.taxonomy_ids + [taxonomy.id])
                   action.call
                   expect(json_response['resources'].count).to eq(1)
                   expect(json_response['resources'][0]['learningObjectives'].map { |x| x['targetName'] }).to match_array([s1.identifier, s2.identifier])
@@ -396,7 +408,7 @@ module Minerva
 
                   tax_map
                   tax_map2
-
+                  resource.update(all_taxonomy_ids: resource.taxonomy_ids + [taxonomy.id, taxonomy2.id])
                   action.call
 
                   objectives = json_response['resources'].first['learningObjectives']
@@ -409,6 +421,7 @@ module Minerva
               context 'when extensions.expandObjectives not set' do
                 it "doesn't return mapped resources" do
                   tax_map
+                  resource.update(all_taxonomy_ids: resource.taxonomy_ids + [taxonomy.id])
                   action.call
                   expect(json_response['resources'].count).to eq(0)
                 end
@@ -418,6 +431,7 @@ module Minerva
                 it "doesn't return mapped resources" do
                   params['extensions.expandObjectives'] = false
                   tax_map
+                  resource.update(all_taxonomy_ids: resource.taxonomy_ids + [taxonomy.id])
                   action.call
                   expect(json_response['resources'].count).to eq(0)
                 end
@@ -633,6 +647,7 @@ module Minerva
             before do
               t = FactoryBot.create(:taxonomy, identifier: 'CCSS.Math.Content.2.G.A.1', min_age: 6, max_age: 7)
               FactoryBot.create(:alignment, resource: resource, taxonomy: t)
+              resource.update(min_age: 6, max_age: 7)
             end
 
             it 'returns some resources with direct match' do
@@ -781,7 +796,7 @@ module Minerva
           it 'returns resources with all fields' do
             t = FactoryBot.create(:taxonomy, identifier: 'CCSS.Math.Content.2.G.A.1', min_age: 6, max_age: 7)
             FactoryBot.create(:alignment, resource: resource, taxonomy: t)
-
+            resource.update(min_age: 6, max_age: 7, resource_stat_ids: [resource_stat.id], direct_taxonomy_ids: resource.taxonomy_ids)
             fields = Minerva::Search::FieldMap.instance.field_map.map { |_k, v| v.output_field }.uniq.compact.join(',')
             params.merge!(limit: 1, fields: fields)
             action.call

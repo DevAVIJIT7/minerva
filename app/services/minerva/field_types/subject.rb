@@ -20,17 +20,18 @@ module Minerva
   module FieldTypes
     class Subject < Base
       def to_sql(clause, _ops = {})
-        unique_field = generate_uniq_field
-        exists_sql = "EXISTS(SELECT 1 FROM subjects INNER JOIN resources_subjects ON resources_subjects.subject_id = subjects.id
-                      WHERE resources_subjects.resource_id = resources.id AND :query_part)"
         query =
           if null_check(clause)
-            exists_sql.gsub(':query_part', null_clause(clause))
+            null_clause(clause)
           else
-            exists_sql.gsub(':query_part', "#{query_field}#{clause.operator == 'ILIKE' ? '::text' : ''}
-            #{clause.operator} :#{unique_field}")
+            ids = if clause.operator == 'ILIKE'
+              Minerva::Subject.where("name::text ILIKE ?", clause.value).pluck(:id).join(',')
+            else
+              Minerva::Subject.where(name: clause.value).pluck(:id).join(',')
+            end
+            ids.present? ? "(all_subject_ids && ARRAY[#{ids}])" : "1=0"
           end
-        SqlResult.new(sql: query, sql_params: { unique_field.to_sym => clause.value })
+        SqlResult.new(sql: query)
       end
     end
   end

@@ -18,25 +18,21 @@ require 'rails_helper'
 
 module Minerva
   describe FieldTypes::LearningObjective do
-    TAXONOMIES_JOIN = ['LEFT OUTER JOIN alignments on alignments.resource_id = resources.id',
-                       'LEFT OUTER JOIN taxonomies on taxonomies.id = alignments.taxonomy_id'].freeze
 
-    TAXONOMIES_SELECT = "(select json_agg(json_build_object('id', taxonomies.id, 'opensalt_identifier', COALESCE(taxonomies.opensalt_identifier, ''), 'description', COALESCE(taxonomies.description, ''), 'alignment_type', COALESCE(taxonomies.alignment_type, ''), 'source', COALESCE(taxonomies.source, ''), 'identifier', COALESCE(taxonomies.identifier, ''))) FROM taxonomies INNER JOIN alignments on taxonomies.id = alignments.taxonomy_id WHERE alignments.resource_id = resources.id)"
+    TAXONOMIES_SELECT = "(select json_agg(json_build_object('id', taxonomies.id, 'opensalt_identifier', COALESCE(taxonomies.opensalt_identifier, ''), 'description', COALESCE(taxonomies.description, ''), 'alignment_type', COALESCE(taxonomies.alignment_type, ''), 'source', COALESCE(taxonomies.source, ''), 'identifier', COALESCE(taxonomies.identifier, ''))) FROM taxonomies WHERE id = ANY(resources.all_taxonomy_ids))"
 
     class Taxonomy
       def self.where(*args); end
     end
 
     let(:taxonomy_pluck) { double(pluck: [1, 2, 3]) }
-    let(:case_item_guid_f) { FieldTypes::LearningObjective.new('learningObjectives.caseItemGUID', TAXONOMIES_SELECT, :learningObjectives, joins: TAXONOMIES_JOIN, as_option: :learning_objectives, query_field: 'taxonomies.opensalt_identifier') }
-    let(:alignment_type_f) { FieldTypes::LearningObjective.new('learningObjectives.alignmentType', TAXONOMIES_SELECT, :learningObjectives, joins: TAXONOMIES_JOIN, as_option: :learning_objectives, query_field: 'taxonomies.description') }
-    let(:target_desc_f) { FieldTypes::LearningObjective.new('learningObjectives.targetDescription', TAXONOMIES_SELECT, :learningObjectives, joins: TAXONOMIES_JOIN, as_option: :learning_objectives, query_field: 'taxonomies.description') }
-    let(:target_url_f) { FieldTypes::LearningObjective.new('learningObjectives.targetURL', TAXONOMIES_SELECT, :learningObjectives, joins: TAXONOMIES_JOIN, as_option: :learning_objectives, query_field: nil) }
-    let(:ed_framework_f) { FieldTypes::LearningObjective.new('learningObjectives.educationalFramework', TAXONOMIES_SELECT, :learningObjectives, joins: TAXONOMIES_JOIN, as_option: :learning_objectives, query_field: nil) }
-    let(:case_item_uri_f) { FieldTypes::LearningObjective.new('learningObjectives.caseItemUri', TAXONOMIES_SELECT, :learningObjectives, as_option: :learning_objectives, joins: TAXONOMIES_JOIN, query_field: 'taxonomies.source') }
-    let(:exists_sql) do
-      'EXISTS(SELECT 1 FROM alignments AS a WHERE a.taxonomy_id IN (1,2,3) AND a.status = 2 AND a.resource_id = resources.id)'
-    end
+    let(:case_item_guid_f) { FieldTypes::LearningObjective.new('learningObjectives.caseItemGUID', TAXONOMIES_SELECT, :learningObjectives, as_option: :learning_objectives, query_field: 'taxonomies.opensalt_identifier') }
+    let(:alignment_type_f) { FieldTypes::LearningObjective.new('learningObjectives.alignmentType', TAXONOMIES_SELECT, :learningObjectives, as_option: :learning_objectives, query_field: 'taxonomies.description') }
+    let(:target_desc_f) { FieldTypes::LearningObjective.new('learningObjectives.targetDescription', TAXONOMIES_SELECT, :learningObjectives, as_option: :learning_objectives, query_field: 'taxonomies.description') }
+    let(:target_url_f) { FieldTypes::LearningObjective.new('learningObjectives.targetURL', TAXONOMIES_SELECT, :learningObjectives, as_option: :learning_objectives, query_field: nil) }
+    let(:ed_framework_f) { FieldTypes::LearningObjective.new('learningObjectives.educationalFramework', TAXONOMIES_SELECT, :learningObjectives, as_option: :learning_objectives, query_field: nil) }
+    let(:case_item_uri_f) { FieldTypes::LearningObjective.new('learningObjectives.caseItemUri', TAXONOMIES_SELECT, :learningObjectives, as_option: :learning_objectives, query_field: 'taxonomies.source') }
+    let(:exists_sql) { '(resources.direct_taxonomy_ids && ARRAY[1,2,3])' }
 
     context 'learningObjectives' do
       describe '#to_sql' do
@@ -70,7 +66,7 @@ module Minerva
     context 'learningObjectives.targetName' do
       describe '#to_sql' do
         let(:field) { 'taxonomies.identifier' }
-        let(:target) { FieldTypes::LearningObjective.new('learningObjectives.targetName', TAXONOMIES_SELECT, :learningObjectives, joins: TAXONOMIES_JOIN, as_option: :learning_objectives, query_field: 'taxonomies.identifier') }
+        let(:target) { FieldTypes::LearningObjective.new('learningObjectives.targetName', TAXONOMIES_SELECT, :learningObjectives, as_option: :learning_objectives, query_field: 'taxonomies.identifier') }
 
         include_examples 'learning_objectives_null_check'
 
@@ -99,7 +95,7 @@ module Minerva
     context 'learningObjectives.caseItemUri' do
       describe '#to_sql' do
         let(:field) { 'taxonomies.source' }
-        let(:target) { FieldTypes::LearningObjective.new('learningObjectives.caseItemUri', TAXONOMIES_SELECT, :learningObjectives, as_option: :learning_objectives, joins: TAXONOMIES_JOIN, query_field: 'taxonomies.source') }
+        let(:target) { FieldTypes::LearningObjective.new('learningObjectives.caseItemUri', TAXONOMIES_SELECT, :learningObjectives, as_option: :learning_objectives, query_field: 'taxonomies.source') }
 
         include_examples 'learning_objectives_null_check'
 
@@ -129,7 +125,7 @@ module Minerva
     context 'learningObjectives.targetDescription' do
       describe '#to_sql' do
         let(:field) { 'taxonomies.description' }
-        let(:target) { FieldTypes::LearningObjective.new('learningObjectives.targetDescription', TAXONOMIES_SELECT, :learningObjectives, joins: TAXONOMIES_JOIN, as_option: :learning_objectives, query_field: 'taxonomies.description') }
+        let(:target) { FieldTypes::LearningObjective.new('learningObjectives.targetDescription', TAXONOMIES_SELECT, :learningObjectives, as_option: :learning_objectives, query_field: 'taxonomies.description') }
 
         include_examples 'learning_objectives_null_check'
 
@@ -160,7 +156,7 @@ module Minerva
     context 'learningObjectives.alignmentType' do
       describe '#to_sql' do
         let(:field) { 'taxonomies.alignment_type' }
-        let(:target) { FieldTypes::LearningObjective.new('learningObjectives.alignmentType', TAXONOMIES_SELECT, :learningObjectives, joins: TAXONOMIES_JOIN, as_option: :learning_objectives, query_field: 'taxonomies.alignment_type') }
+        let(:target) { FieldTypes::LearningObjective.new('learningObjectives.alignmentType', TAXONOMIES_SELECT, :learningObjectives, as_option: :learning_objectives, query_field: 'taxonomies.alignment_type') }
 
         include_examples 'learning_objectives_null_check'
 
@@ -185,7 +181,7 @@ module Minerva
     context 'learningObjectives.caseItemGUID' do
       describe '#to_sql' do
         let(:field) { 'taxonomies.opensalt_identifier' }
-        let(:target) { FieldTypes::LearningObjective.new('learningObjectives.caseItemGUID', TAXONOMIES_SELECT, :learningObjectives, joins: TAXONOMIES_JOIN, as_option: :learning_objectives, query_field: 'taxonomies.opensalt_identifier') }
+        let(:target) { FieldTypes::LearningObjective.new('learningObjectives.caseItemGUID', TAXONOMIES_SELECT, :learningObjectives, as_option: :learning_objectives, query_field: 'taxonomies.opensalt_identifier') }
 
         include_examples 'learning_objectives_null_check'
 
@@ -211,7 +207,7 @@ module Minerva
       describe '#to_sql' do
         it 'returns 1=0' do
           %w[learningObjectives.educationalFramework learningObjectives.targetURL].each do |target_field|
-            target = FieldTypes::LearningObjective.new(target_field, TAXONOMIES_SELECT, :learningObjectives, joins: TAXONOMIES_JOIN, as_option: :learning_objectives, query_field: nil)
+            target = FieldTypes::LearningObjective.new(target_field, TAXONOMIES_SELECT, :learningObjectives, as_option: :learning_objectives, query_field: nil)
             result = target.to_sql(OpenStruct.new(value: 'some_guid', operator: '<>'))
             expect(result.sql).to eq('1=0')
           end
