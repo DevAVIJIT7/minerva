@@ -78,7 +78,7 @@ class CreateMinervaTables < MIGRATION_CLASS
       t.citext 'accessibility_features', default: [], null: false, array: true
       t.citext 'accessibility_hazards', default: [], null: false, array: true
       t.citext 'access_mode', default: [], null: false, array: true
-      t.text 'publish_date'
+      t.datetime 'publish_date'
       t.integer 'direct_taxonomy_ids', default: [], null: false, array: true
       t.integer 'all_taxonomy_ids', default: [], null: false, array: true
       t.integer 'resource_stat_ids', default: [], null: false, array: true
@@ -152,8 +152,10 @@ class CreateMinervaTables < MIGRATION_CLASS
       t.citext 'source'
       t.citext 'name'
       t.citext 'opensalt_identifier'
+      t.text 'aliases', default: [], null: false, array: true
       t.index 'identifier gin_trgm_ops', name: 'index_taxonomy_on_identifier_gin', using: :gin
       t.index ['ancestry'], name: 'index_taxonomy_on_ancestry'
+      t.index ['aliases'], name: 'index_taxonomies_on_aliases', using: :gin
       t.index ['min_age'], name: 'index_taxonomies_on_min_age'
       t.index ['max_age'], name: 'index_taxonomies_on_max_age'
       t.index ['description'], name: 'index_taxonomies_on_description'

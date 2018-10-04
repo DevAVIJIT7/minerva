@@ -252,13 +252,13 @@ module Minerva
 
           context 'searches by learningObjectives' do
             let!(:s1) do
-              s = FactoryBot.create(:taxonomy, identifier: 'CCSS.Math.Content.2.G.A.1', description: 'some math description ', opensalt_identifier: 's1')
+              s = FactoryBot.create(:taxonomy, identifier: 'CCSS.Math.Content.2.G.A.1', aliases: ['CCSS.Math.Content.2.G.A.1'.downcase], description: 'some math description ', opensalt_identifier: 's1')
               s.alignments = [FactoryBot.create(:alignment, resource: resource)]
               s
             end
 
             let!(:s2) do
-              s = FactoryBot.create(:taxonomy, identifier: 'CCSS.Math.Content.2.G.A.2', opensalt_identifier: 's2', source: 'https://opensalt.net/uri/s2')
+              s = FactoryBot.create(:taxonomy, identifier: 'CCSS.Math.Content.2.G.A.2', aliases: ['CCSS.Math.Content.2.G.A.2'.downcase], opensalt_identifier: 's2', source: 'https://opensalt.net/uri/s2')
               s.alignments = [FactoryBot.create(:alignment, resource: resource)]
               s
             end
@@ -365,8 +365,8 @@ module Minerva
             end
 
             context 'when filtering using extensions.expandObjectives' do
-              let(:taxonomy) { FactoryBot.create(:taxonomy, identifier: 'SOME_MAPPED_TAXONOMY') }
-              let(:taxonomy2) { FactoryBot.create(:taxonomy, identifier: 'TAX2') }
+              let(:taxonomy) { FactoryBot.create(:taxonomy, identifier: 'SOME_MAPPED_TAXONOMY', aliases: ['SOME_MAPPED_TAXONOMY'.downcase]) }
+              let(:taxonomy2) { FactoryBot.create(:taxonomy, identifier: 'TAX2', aliases: ['TAX2'.downcase]) }
               let(:tax_map) do
                 FactoryBot.create(:taxonomy_mapping, target_id: s1.id, taxonomy_id: taxonomy.id)
               end

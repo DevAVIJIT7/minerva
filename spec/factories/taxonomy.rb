@@ -21,6 +21,7 @@ FactoryBot.define do
 
   factory :taxonomy, class: Minerva::Alignments::Taxonomy do
     identifier
+    aliases { [identifier] }
     name { Faker::Lorem.sentence }
     alignment_type { 'teaches' }
     description { Faker::Lorem.paragraph }

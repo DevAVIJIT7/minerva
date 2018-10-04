@@ -71,21 +71,35 @@ module Minerva
         include_examples 'learning_objectives_null_check'
 
         it 'returns sql, operator =' do
-          expect(Alignments::Taxonomy).to receive(:where).with('(lower(identifier) IN (?))', ['some_ident']).and_return(taxonomy_pluck)
-          result = target.to_sql(OpenStruct.new(value: 'some_ident', operator: '='))
-          expect(result.sql).to eq(exists_sql)
-          expect(result.sql_params.keys.count).to eq(0)
+          [{alias_search: false, valid_sql: '(lower(identifier) IN (?))'}, {alias_search: true, valid_sql: '(aliases && Array[?])'}].each do |variant|
+            Minerva.configuration.search_by_taxonomy_aliases = variant[:alias_search]
+            expect(Alignments::Taxonomy).to receive(:where).with(variant[:valid_sql], ['some_ident']).and_return(taxonomy_pluck)
+            result = target.to_sql(OpenStruct.new(value: 'some_ident', operator: '='))
+            expect(result.sql).to eq(exists_sql)
+            expect(result.sql_params.keys.count).to eq(0)
+          end
         end
 
         it 'returns sql, operator <>' do
-          expect(Alignments::Taxonomy).to receive(:where).with('NOT(lower(identifier) IN (?))', ['some_ident']).and_return(taxonomy_pluck)
-          result = target.to_sql(OpenStruct.new(value: 'some_ident', operator: '<>'))
-          expect(result.sql).to eq(exists_sql)
-          expect(result.sql_params.keys.count).to eq(0)
+          [{alias_search: false, valid_sql: 'NOT(lower(identifier) IN (?))'}, {alias_search: true, valid_sql: 'NOT(aliases && Array[?])'}].each do |variant|
+            Minerva.configuration.search_by_taxonomy_aliases = variant[:alias_search]
+            expect(Alignments::Taxonomy).to receive(:where).with(variant[:valid_sql], ['some_ident']).and_return(taxonomy_pluck)
+            result = target.to_sql(OpenStruct.new(value: 'some_ident', operator: '<>'))
+            expect(result.sql).to eq(exists_sql)
+            expect(result.sql_params.keys.count).to eq(0)
+          end
         end
 
         include_examples 'learning_objectives_expand_objectives' do
+          Minerva.configuration.search_by_taxonomy_aliases = false
           let(:where_clause) { '(lower(identifier) IN (?))' }
+          let(:value) { ['some_ident'] }
+          let(:value2) { 'some_ident' }
+        end
+
+        include_examples 'learning_objectives_expand_objectives' do
+          Minerva.configuration.search_by_taxonomy_aliases = true
+          let(:where_clause) { '(aliases && Array[?])' }
           let(:value) { ['some_ident'] }
           let(:value2) { 'some_ident' }
         end

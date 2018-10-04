@@ -39,7 +39,12 @@ module Minerva
                   if null_check(clause)
                     clause.value = Alignments::Taxonomy.where(null_clause(clause)).pluck(:id).join(',')
                   else
-                    clause.value = Alignments::Taxonomy.where("#{clause.operator == '<>' ? 'NOT' : ''}(lower(identifier) IN (?))", clause.value.downcase.split(',')).pluck(:id).join(',')
+                    identifiers = clause.value.downcase.split(',')
+                    if Minerva.configuration.search_by_taxonomy_aliases
+                      clause.value = Alignments::Taxonomy.where("#{clause.operator == '<>' ? 'NOT' : ''}(aliases && Array[?])", identifiers).pluck(:id).join(',')
+                    else
+                      clause.value = Alignments::Taxonomy.where("#{clause.operator == '<>' ? 'NOT' : ''}(lower(identifier) IN (?))", identifiers).pluck(:id).join(',')
+                    end
                   end
                   check_standard_ids(clause, ops)
                 elsif filter_field == 'learningObjectives.targetDescription'

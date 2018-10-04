@@ -26,6 +26,7 @@ Minerva.configure do |config|
   # FieldTypes::CaseInsensitiveString.new('some_field', 'resources.some_field', :some_field, is_sortable: true)]
 
   config.extension_fields = []
+  config.search_by_taxonomy_aliases = true
 
   # To extend resource model you need specify module, it will be added to resource model
   # config.model_extensions = { resource: ResourceExtender }
