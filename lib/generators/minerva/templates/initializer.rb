@@ -28,6 +28,12 @@ Minerva.configure do |config|
   config.extension_fields = []
   config.search_by_taxonomy_aliases = true
 
+  config.admin_auth_proc = Proc.new do |controller|
+    controller.authenticate_or_request_with_http_basic('Minerva') do |username, password|
+      controller.render(:json => "Forbidden", :status => 403, :layout => false)
+    end
+  end
+
   # To extend resource model you need specify module, it will be added to resource model
   # config.model_extensions = { resource: ResourceExtender }
 

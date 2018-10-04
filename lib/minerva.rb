@@ -3,6 +3,7 @@
 require 'active_model_serializers'
 require 'chronic_duration'
 require 'faraday'
+require 'rails_admin'
 require 'extensions/object'
 require 'hair_trigger'
 require 'minerva/configuration'
