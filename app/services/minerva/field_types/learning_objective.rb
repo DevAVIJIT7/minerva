@@ -31,7 +31,12 @@ module Minerva
                   if null_check(clause)
                     clause.value = Alignments::Taxonomy.where(null_clause(clause)).pluck(:id).join(',')
                   else
-                    clause.value = Alignments::Taxonomy.where("#{clause.operator == '<>' ? 'NOT' : ''}(source ~* (?))", clause.value).pluck(:id).join(',')
+                    query_str = clause.value
+                    clause.value = Alignments::Taxonomy.where("#{clause.operator == '<>' ? 'NOT' : ''}(source ~* (?))", query_str).pluck(:id).join(',')
+                    if clause.value.blank?
+                      guids = query_str.split('|').map {|x| x.split('/').last}.join('|')
+                      clause.value = Alignments::Taxonomy.where("#{clause.operator == '<>' ? 'NOT' : ''}(opensalt_identifier ~* (?))", guids).pluck(:id).join(',')
+                    end
                   end
                   check_standard_ids(clause, ops)
                 elsif filter_field == 'learningObjectives.targetName'
