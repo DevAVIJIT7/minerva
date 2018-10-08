@@ -31,7 +31,7 @@ FactoryBot.define do
     "Publisher #{n}"
   end
 
-  factory :resource, class: Minerva::Resources::Resource do
+  factory :resource, class: Minerva::Resource do
     name
     description
     publisher
@@ -39,19 +39,19 @@ FactoryBot.define do
     learning_resource_type { 'Media/Video' }
   end
 
-  factory :video, class: Minerva::Resources::Video, parent: :resource do
+  factory :video, class: Minerva::Resource, parent: :resource do
     learning_resource_type { 'Media/Video' }
   end
 
-  factory :game, class: Minerva::Resources::Game, parent: :resource do
+  factory :game, class: Minerva::Resource, parent: :resource do
     learning_resource_type { 'Game' }
   end
 
-  factory :homework, class: Minerva::Resources::Homework, parent: :resource do
+  factory :homework, class: Minerva::Resource, parent: :resource do
     learning_resource_type { 'Assessment/Preparation' }
   end
 
-  factory :other, class: Minerva::Resources::Other, parent: :resource do
+  factory :other, class: Minerva::Resource, parent: :resource do
     learning_resource_type { 'Other' }
   end
 end

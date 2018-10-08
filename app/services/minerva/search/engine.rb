@@ -48,12 +48,12 @@ module Minerva
           self.fields = self.fields.join(',')
         end
 
-        resources = Resources::Resource.select("#{fields}").where(tf[:where])
+        resources = Resource.select("#{fields}").where(tf[:where])
                                        .order("#{sort.query_field} #{order_by}")
 
         global_filter = Minerva.configuration.filter_sql_proc.call(resource_owner_id) if Minerva.configuration.filter_sql_proc
         resources = resources.where(global_filter) if global_filter
-        cnt_query = Resources::Resource.where(tf[:where])
+        cnt_query = Resource.where(tf[:where])
         total_count = (global_filter ? cnt_query.where(global_filter) : cnt_query).count
 
         result = PaginationService.new(resources, total_count).page(limit, offset)

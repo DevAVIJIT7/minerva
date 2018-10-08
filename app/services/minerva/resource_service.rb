@@ -30,7 +30,7 @@ module Minerva
           params[:taxonomy_ids] = params[:direct_taxonomy_ids] = Alignments::Taxonomy.where('lower(identifier) in (:terms) OR lower(opensalt_identifier) in (:terms)',
                                                                  terms: params.delete(:taxonomies)).pluck(:id)
         end
-        [Resources::Resource.create!(params)]
+        [Resource.create!(params)]
       end
     end
 
@@ -38,7 +38,7 @@ module Minerva
 
     def load_from_csv(csv_string)
       data = CSV.parse(csv_string)
-      cols = Resources::Resource.columns.index_by(&:name)
+      cols = Resource.columns.index_by(&:name)
       relation_cols = %w[taxonomies subjects]
       headers = data[0]
       data[1..-1].map do |row|
@@ -65,7 +65,7 @@ module Minerva
           end
           result[col] = value
         end
-        Resources::Resource.create!(res_params)
+        Resource.create!(res_params)
       end
     end
   end

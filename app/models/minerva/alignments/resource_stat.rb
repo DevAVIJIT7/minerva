@@ -20,7 +20,7 @@ module Minerva
     class ResourceStat < ApplicationRecord
       self.table_name = :resource_stats
 
-      belongs_to :resource, class_name: 'Minerva::Resources::Resource'
+      belongs_to :resource, class_name: 'Minerva::Resource'
       belongs_to :taxonomy, class_name: 'Minerva::Alignments::Taxonomy'
     end
   end

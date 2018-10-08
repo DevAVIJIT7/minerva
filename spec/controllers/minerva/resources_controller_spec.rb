@@ -81,7 +81,7 @@ module Minerva
 
         data = { csv_file_url: 'http://example.com/file.csv' }
         post :create, params: data
-        expect(Resources::Resource.count).to eq(50)
+        expect(Resource.count).to eq(50)
       end
     end
 
@@ -98,7 +98,7 @@ module Minerva
         resource
         expect do
           delete :destroy, params: { id: resource.id }
-        end.to change(Resources::Resource, :count).by(-1)
+        end.to change(Resource, :count).by(-1)
       end
     end
 

@@ -24,7 +24,7 @@ module Minerva
       has_ancestry orphan_strategy: :restrict
 
       has_many :alignments, class_name: 'Minerva::Alignments::Alignment', dependent: :destroy
-      has_many :resources, class_name: 'Minerva::Resources::Resource', through: :alignments
+      has_many :resources, class_name: 'Minerva::Resource', through: :alignments
       has_many :taxonomy_mappings, class_name: 'Minerva::Alignments::TaxonomyMapping', inverse_of: :taxonomy, dependent: :destroy
       has_many :target_taxonomy_mappings,
                class_name: 'Minerva::Alignments::TaxonomyMapping', inverse_of: :target_taxonomy,

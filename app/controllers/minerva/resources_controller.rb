@@ -51,7 +51,7 @@ module Minerva
     private
 
     def resource
-      @resource ||= Resources::Resource.find(params.fetch(:id))
+      @resource ||= Resource.find(params.fetch(:id))
     end
 
     def resource_params

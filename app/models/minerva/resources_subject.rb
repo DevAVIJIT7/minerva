@@ -18,7 +18,7 @@ module Minerva
   class ResourcesSubject < ApplicationRecord
     self.table_name = :resources_subjects
 
-    belongs_to :resource, inverse_of: :resources_subjects, class_name: 'Minerva::Resources::Resource'
+    belongs_to :resource, inverse_of: :resources_subjects, class_name: 'Minerva::Resource'
     belongs_to :subject, inverse_of: :resources_subjects, class_name: 'Minerva::Subject'
   end
 end

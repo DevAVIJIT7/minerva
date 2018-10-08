@@ -31,7 +31,7 @@ module Minerva
                                       ELSE concat_ws('-', resources.min_age, least(12, resources.max_age))
                                       END)"
 
-      ALL_CLASSES = [Minerva::Resources::Resource, Minerva::Alignments::ResourceStat, Minerva::Subject, Minerva::Alignments::Taxonomy].freeze
+      ALL_CLASSES = [Minerva::Resource, Minerva::Alignments::ResourceStat, Minerva::Subject, Minerva::Alignments::Taxonomy].freeze
 
       def generate_field_map
         minerva_map.select { |x| x.custom_search || @available_columns.include?(x.query_field) }.index_by(&:filter_field)

@@ -22,6 +22,6 @@ module Minerva
 
     has_ancestry orphan_strategy: :restrict
     has_many :resources_subjects, class_name: 'Minerva::ResourcesSubject', dependent: :destroy
-    has_many :resources, class_name: 'Minerva::Resources::Resource', through: :resources_subjects
+    has_many :resources, class_name: 'Minerva::Resource', through: :resources_subjects
   end
 end
