@@ -83,6 +83,7 @@ class CreateMinervaTables < MIGRATION_CLASS
       t.integer 'all_taxonomy_ids', default: [], null: false, array: true
       t.integer 'resource_stat_ids', default: [], null: false, array: true
       t.integer 'all_subject_ids', default: [], null: false, array: true
+      t.jsonb 'efficacy'
       t.integer 'min_age'
       t.integer 'max_age'
       t.float 'rating'

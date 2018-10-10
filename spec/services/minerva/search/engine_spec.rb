@@ -88,7 +88,7 @@ module Minerva
 
         it 'throws error wrong sort' do
           expect(Search::Engine.new(sort: 'invalid_field', orderBy: 'asc').perform.warning)
-            .to eq(Severity: :warning, CodeMinor: :invalid_sort_field, Description: 'Use any of name, description, publisher, learningResourceType, language, rating, publishDate, timeRequired, author for sorting parameter')
+            .to eq(Severity: :warning, CodeMinor: :invalid_sort_field, Description: 'Use any of name, description, publisher, efficacy, learningResourceType, language, rating, publishDate, timeRequired, author for sorting parameter')
         end
 
         it 'throws error wrong orderBy' do

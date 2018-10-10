@@ -49,7 +49,11 @@ module Minerva
         end
 
         resources = Resource.select("#{fields}").where(tf[:where])
-                                       .order("#{sort.query_field} #{order_by}")
+        if sort[:json_key]
+          resources = resources.order("#{sort[:sort_field].query_field}->>'#{sort[:json_key]}' #{order_by}")
+        else
+          resources = resources.order("#{sort[:sort_field].query_field} #{order_by}")
+        end
 
         global_filter = Minerva.configuration.filter_sql_proc.call(resource_owner_id) if Minerva.configuration.filter_sql_proc
         resources = resources.where(global_filter) if global_filter

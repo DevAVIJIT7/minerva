@@ -24,7 +24,6 @@ module Minerva
 
       TAXONOMIES_SELECT = "(select json_agg(json_build_object('id', taxonomies.id, 'opensalt_identifier', COALESCE(taxonomies.opensalt_identifier, ''), 'description', COALESCE(taxonomies.description, ''), 'alignment_type', COALESCE(taxonomies.alignment_type, ''), 'source', COALESCE(taxonomies.source, ''), 'identifier', COALESCE(taxonomies.identifier, ''))) FROM taxonomies WHERE id = ANY(resources.direct_taxonomy_ids))"
       TEXT_COMPLEXITY_SELECT = "jsonb_build_array(json_build_object('name', 'Flesch-Kincaid', 'value', resources.text_complexity->>'flesch_kincaid'), json_build_object('name', 'Lexile', 'value', resources.text_complexity->>'lexile'))"
-      EFFICACY_SELECT = '(select json_agg(CASE WHEN resource_stats.taxonomy_ident IS NOT NULL THEN json_build_object(resource_stats.taxonomy_ident, resource_stats.effectiveness) ELSE \'{}\'::json END) from resource_stats WHERE id = ANY(resources.resource_stat_ids))'
       SUBJECT_SELECT = '(select array_agg(subjects.name) from subjects WHERE id = ANY(resources.all_subject_ids))'
       AGE_RANGE_SELECT = "(SELECT CASE WHEN resources.min_age IS NULL THEN least(12, resources.max_age)::text
                                       WHEN resources.max_age IS NULL THEN resources.min_age::text
@@ -64,7 +63,7 @@ module Minerva
           FieldTypes::CaseInsensitiveString.new('description', 'resources.description', :description, is_sortable: true),
           FieldTypes::CaseInsensitiveString.new('publisher', 'resources.publisher', :publisher, is_sortable: true),
           FieldTypes::Subject.new('subject', SUBJECT_SELECT, :subject, query_field: 'all_subject_ids', custom_search: true),
-          FieldTypes::Efficacy.new('efficacy', EFFICACY_SELECT, :efficacy,  query_field: 'resource_stats.effectiveness'),
+          FieldTypes::Efficacy.new('efficacy', 'resources.efficacy', :efficacy,  query_field: 'resources.efficacy', is_sortable: true),
           FieldTypes::LearningObjective.new('learningObjectives', TAXONOMIES_SELECT, :learningObjectives, query_field: 'taxonomies.identifier', as_option: :learning_objectives),
           FieldTypes::LearningObjective.new('learningObjectives.targetName', TAXONOMIES_SELECT, :learningObjectives, as_option: :learning_objectives, query_field: 'taxonomies.identifier'),
           FieldTypes::LearningObjective.new('learningObjectives.caseItemGUID', TAXONOMIES_SELECT, :learningObjectives, as_option: :learning_objectives, query_field: 'taxonomies.opensalt_identifier'),

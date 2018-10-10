@@ -32,7 +32,7 @@ module Minerva
         warning = result[:warning]
 
         result = check_sort(attrs)
-        sort = result[:sort]
+        sort = result.slice(:sort_field, :json_key)
         warning ||= result[:warning]
 
         result = check_order(attrs)
@@ -143,13 +143,14 @@ module Minerva
 
       def check_sort(attrs)
         return {} unless attrs[:sort].present?
-        sort = FieldMap.instance.field_map.select { |_k, v| v.is_sortable }[attrs[:sort]]
+        sort_key, json_key = attrs[:sort].split(':')
+        sort = FieldMap.instance.field_map.select { |_k, v| v.is_sortable }[sort_key]
         unless sort
           warning = { Severity: :warning, CodeMinor: :invalid_sort_field, Description: "Use any of #{FieldMap.instance.field_map.select { |_k, v| v.is_sortable }.keys.join(', ')} for sorting parameter" }
           sort = FieldMap.instance.field_map['name']
         end
 
-        { warning: warning, sort: sort }
+        { warning: warning, sort_field: sort, json_key: json_key }
       end
 
       def check_order(attrs)

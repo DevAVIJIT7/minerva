@@ -110,7 +110,11 @@ module Minerva
       end
 
       let!(:resource_stat) do
-        FactoryBot.create(:resource_stat, resource: resource, effectiveness: 77)
+        result = FactoryBot.create(:resource_stat, resource: resource, effectiveness: 77)
+        stats = Alignments::ResourceStat.where(resource_id: resource.id)
+                    .pluck(:taxonomy_ident, :effectiveness).inject({}) { |h, el| h.merge([el].to_h) }
+        resource.update(efficacy: stats)
+        result
       end
 
       context 'authorized user request' do
@@ -231,9 +235,12 @@ module Minerva
 
           describe 'searching efficacy' do
             before(:each) do
-              FactoryBot.create(:resource_stat, resource: resource)
-              FactoryBot.create(:resource_stat, resource: resource)
-              resource.update(resource_stat_ids: Alignments::ResourceStat.where(resource_id: resource.id).pluck(:id))
+              FactoryBot.create(:resource_stat, resource: resource, taxonomy_ident: 'K.CC.1', effectiveness: 2)
+              FactoryBot.create(:resource_stat, resource: resource, taxonomy_ident: 'K.CC.2', effectiveness: 1)
+              stats = Alignments::ResourceStat.where(resource_id: resource.id)
+                          .pluck(:taxonomy_ident, :effectiveness).inject({}) { |h, el| h.merge([el].to_h) }
+              resource.update(resource_stat_ids: Alignments::ResourceStat.where(resource_id: resource.id).pluck(:id),
+                              efficacy: stats)
             end
 
             it 'returns efficacy' do
@@ -244,9 +251,31 @@ module Minerva
               params.merge!(limit: 1, filter: "efficacy!='NULL'")
               action.call
 
-              stats = Alignments::ResourceStat.where(resource_id: resource.id)
-                          .pluck(:taxonomy_ident, :effectiveness).map { |el| [el].to_h }
-              expect(json_response['resources'][0]['efficacy']).to match_array(stats)
+              expect(json_response['resources'][0]['efficacy']).to match_array(resource.efficacy)
+            end
+
+            context 'sorts by efficacy' do
+              let(:resource2) { FactoryBot.create(:video) }
+              before do
+                FactoryBot.create(:resource_stat, resource: resource2, taxonomy_ident: 'K.CC.1', effectiveness: 1)
+                FactoryBot.create(:resource_stat, resource: resource2, taxonomy_ident: 'K.CC.2', effectiveness: 2)
+                stats = Alignments::ResourceStat.where(resource_id: resource2.id)
+                            .pluck(:taxonomy_ident, :effectiveness).inject({}) { |h, el| h.merge([el].to_h) }
+                resource2.update(resource_stat_ids: Alignments::ResourceStat.where(resource_id: resource2.id).pluck(:id),
+                                efficacy: stats)
+              end
+
+              it 'sorts asc' do
+                params.merge!(filter: "efficacy!='NULL'", sort: 'efficacy:K.CC.1')
+                action.call
+                expect(json_response['resources'].map {|x| x['id']}).to eq([resource2.id, resource.id])
+              end
+
+              it 'sorts desc' do
+                params.merge!(filter: "efficacy!='NULL'", sort: 'efficacy:K.CC.1', orderBy: 'desc')
+                action.call
+                expect(json_response['resources'].map {|x| x['id']}).to eq([resource.id, resource2.id])
+              end
             end
           end
 
@@ -789,7 +818,7 @@ module Minerva
 
               # Non-essential traits
               'extensions' => {},
-              'efficacy' => [{ resource_stat.taxonomy.identifier => 77 }]
+              'efficacy' => { resource_stat.taxonomy.identifier => 77 }
             }
           end
 
@@ -883,7 +912,7 @@ module Minerva
             expect(response).to be_successful
             expect(json_response['resources'].count).to eq(1)
             expect(json_response['Severity']).to eq('warning')
-            expect(json_response['Description']).to eq('Use any of name, description, publisher, learningResourceType, language, rating, publishDate, timeRequired, author for sorting parameter')
+            expect(json_response['Description']).to eq('Use any of name, description, publisher, efficacy, learningResourceType, language, rating, publishDate, timeRequired, author for sorting parameter')
           end
 
           specify 'for wrong orderBy (should be asc/desc)' do
