@@ -63,7 +63,7 @@ module Minerva
           FieldTypes::CaseInsensitiveString.new('description', 'resources.description', :description, is_sortable: true),
           FieldTypes::CaseInsensitiveString.new('publisher', 'resources.publisher', :publisher, is_sortable: true),
           FieldTypes::Subject.new('subject', SUBJECT_SELECT, :subject, query_field: 'all_subject_ids', custom_search: true),
-          FieldTypes::Efficacy.new('efficacy', 'resources.efficacy', :efficacy,  query_field: 'resources.efficacy', is_sortable: true),
+          FieldTypes::Efficacy.new('efficacy', 'resources.efficacy', :efficacy,  query_field: 'resources.efficacy', is_sortable: true, field_type: 'int'),
           FieldTypes::LearningObjective.new('learningObjectives', TAXONOMIES_SELECT, :learningObjectives, query_field: 'taxonomies.identifier', as_option: :learning_objectives),
           FieldTypes::LearningObjective.new('learningObjectives.targetName', TAXONOMIES_SELECT, :learningObjectives, as_option: :learning_objectives, query_field: 'taxonomies.identifier'),
           FieldTypes::LearningObjective.new('learningObjectives.caseItemGUID', TAXONOMIES_SELECT, :learningObjectives, as_option: :learning_objectives, query_field: 'taxonomies.opensalt_identifier'),

@@ -50,9 +50,10 @@ module Minerva
 
         resources = Resource.select("#{fields}").where(tf[:where])
         if sort[:json_key]
-          resources = resources.order("#{sort[:sort_field].query_field}->>'#{sort[:json_key]}' #{order_by}")
+          raise ArgumentError.new("Unspecified field type for json sorting") if sort[:sort_field].field_type.blank?
+          resources = resources.order("(#{sort[:sort_field].query_field}->>'#{sort[:json_key]}')::#{sort[:sort_field].field_type} #{order_by} NULLS LAST")
         else
-          resources = resources.order("#{sort[:sort_field].query_field} #{order_by}")
+          resources = resources.order("#{sort[:sort_field].query_field} #{order_by} NULLS LAST")
         end
 
         global_filter = Minerva.configuration.filter_sql_proc.call(resource_owner_id) if Minerva.configuration.filter_sql_proc
