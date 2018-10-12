@@ -8,7 +8,6 @@ RailsAdmin.config do |config|
     dashboard                     # mandatory
     index                         # mandatory
     new
-    export
     bulk_delete
     show
     edit
@@ -19,9 +18,29 @@ RailsAdmin.config do |config|
     # history_show
   end
 
+  config.model 'Minerva::Alignments::Taxonomy' do
+    object_label_method do
+      :identifier
+    end
 
-  config.excluded_models = ['ApiKey']
+    [:taxonomy_mappings, :alignments, :target_taxonomy_mappings].each do |assoc|
+      configure assoc do
+        hide
+        filterable false
+        searchable false
+      end
+    end
+  end
 
+  config.model 'Minerva::Resource' do
+    [:alignments, :resources_subjects].each do |assoc|
+      configure assoc do
+        hide
+        filterable false
+        searchable false
+      end
+    end
+  end
 end
 
 require 'rails_admin/config/fields/base'
