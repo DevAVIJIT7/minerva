@@ -41,7 +41,7 @@ module Minerva
       cols = Resource.columns.index_by(&:name)
       relation_cols = %w[taxonomies subjects]
       headers = data[0]
-      data[1..-1].map do |row|
+      resources = data[1..-1].map do |row|
         res_params = headers.each_with_index.each_with_object({}) do |(col, idx), result|
           raise ArgumentError, 'wrong column in csv file' if !headers.include?(col) && !relation_cols.include?(col)
           value = row[idx]
@@ -67,6 +67,8 @@ module Minerva
         end
         Resource.create!(res_params)
       end
+      Resource.update_denormalized_data(resources.map(&:id))
+      resources
     end
   end
 end

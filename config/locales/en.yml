@@ -1,0 +1,7 @@
+en:
+  admin:
+    actions:
+      import:
+        title: Import
+        breadcrumb: Import
+        menu: Import

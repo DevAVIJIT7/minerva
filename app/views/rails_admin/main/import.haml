@@ -1,0 +1,21 @@
+- if @resources.present?
+  %p
+    Imported
+    =@resources.count
+    resources
+
+= form_tag import_path(@abstract_model), :multipart => true, class: 'form-horizontal denser' do
+  .form-group.control-group
+    %label.col-sm-2.control-label{for: "file"}= t("admin.import.file")
+    .col-sm-10.controls
+      = file_field_tag :file, :class => "form-control"
+
+  %br
+  .form-actions
+    %input{type: :hidden, name: 'return_to', value: (request.params[:return_to].presence || request.referer)}
+    %button.btn.btn-primary{type: "submit", name: "commit", data: {disable_with: "Uploading..."} }
+      %i.icon-white.icon-ok
+      = t("admin.form.save")
+    %button.btn{type: "submit", name: "_continue"}
+      %i.icon-remove
+      = t("admin.form.cancel")
