@@ -45,6 +45,23 @@ module Minerva
 
     private
 
+    def self.update_denormalized_data(ids)
+      Minerva::Resource.where(id: ids).update_all("
+      direct_taxonomy_ids = (SELECT coalesce(array_agg(taxonomies.id), '{}') FROM taxonomies
+                             INNER JOIN alignments ON taxonomies.id = alignments.taxonomy_id
+                             WHERE alignments.resource_id = resources.id),
+      all_taxonomy_ids = (SELECT coalesce(uniq(sort(array_remove(array_agg(taxonomies.id::int) || array_agg(taxonomy_mappings.taxonomy_id::int) || array_agg(taxonomy_mappings.target_id::int), NULL))), '{}')  FROM taxonomies
+                             INNER JOIN alignments ON taxonomies.id = alignments.taxonomy_id
+                             LEFT JOIN taxonomy_mappings ON taxonomies.id IN (taxonomy_mappings.taxonomy_id, taxonomy_mappings.target_id)
+                             WHERE alignments.resource_id = resources.id),
+      resource_stat_ids = (SELECT coalesce(array_agg(resource_stats.id), '{}') FROM resource_stats INNER JOIN alignments ON resource_stats.taxonomy_id = alignments.taxonomy_id WHERE alignments.resource_id = resources.id),
+      all_subject_ids = (SELECT coalesce(array_agg(subjects.id), '{}') FROM subjects INNER JOIN resources_subjects ON resources_subjects.subject_id = subjects.id WHERE resources_subjects.resource_id = resources.id),
+      avg_efficacy = (SELECT avg(resource_stats.effectiveness)  FROM resource_stats INNER JOIN alignments ON resource_stats.taxonomy_id = alignments.taxonomy_id WHERE alignments.resource_id = resources.id),
+      efficacy = (SELECT replace(replace(replace(json_agg(CASE WHEN resource_stats.taxonomy_ident IS NOT NULL THEN json_build_object(taxonomies.identifier, resource_stats.effectiveness) ELSE '{}'::json END)::text, '}, {', ', '), ']', ''), '[', '')::jsonb
+                 FROM resource_stats INNER JOIN alignments ON resource_stats.taxonomy_id = alignments.taxonomy_id INNER JOIN taxonomies ON taxonomies.id = alignments.taxonomy_id WHERE alignments.resource_id = resources.id)")
+    end
+
+
     def validate_model
       if text_complexity && (!text_complexity.is_a?(Hash) || (text_complexity.keys.map(&:to_s) - TEXT_COMPLEXITY).present?)
         errors.add(:text_complexity, "should contain #{TEXT_COMPLEXITY} keys")
