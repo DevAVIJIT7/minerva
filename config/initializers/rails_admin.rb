@@ -56,10 +56,6 @@ RailsAdmin.config do |config|
     import do
       only Minerva::Resource
     end
-
-    ## With an audit adapter, you can add:
-    # history_index
-    # history_show
   end
 
   config.model 'Minerva::Alignments::Taxonomy' do
@@ -84,12 +80,25 @@ RailsAdmin.config do |config|
         searchable false
       end
     end
+
+    list do
+      field :name
+      field :created_at do
+        date_format :short
+      end
+      field :url
+      field :publisher
+      field :learning_resource_type
+    end
+    edit do
+      include_all_fields
+      [:created_at, :avg_efficacy, :min_age, :max_age, :efficacy].each do |f|
+        field f do
+          read_only true
+        end
+      end
+    end
   end
-
-
-
-  config.excluded_models = ['ApiKey']
-
 end
 
 require 'rails_admin/config/fields/base'
