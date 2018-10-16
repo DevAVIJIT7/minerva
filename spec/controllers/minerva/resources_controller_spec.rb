@@ -239,7 +239,7 @@ module Minerva
               FactoryBot.create(:resource_stat, resource: resource, taxonomy_ident: 'K.CC.2', effectiveness: 1)
               stats = Alignments::ResourceStat.where(resource_id: resource.id)
                           .pluck(:taxonomy_ident, :effectiveness).inject({}) { |h, el| h.merge([el].to_h) }
-              resource.update(resource_stat_ids: Alignments::ResourceStat.where(resource_id: resource.id).pluck(:id),
+              resource.update_columns(resource_stat_ids: Alignments::ResourceStat.where(resource_id: resource.id).pluck(:id),
                               efficacy: stats)
             end
 
@@ -261,7 +261,7 @@ module Minerva
                 FactoryBot.create(:resource_stat, resource: resource2, taxonomy_ident: 'K.CC.2', effectiveness: 2)
                 stats = Alignments::ResourceStat.where(resource_id: resource2.id)
                             .pluck(:taxonomy_ident, :effectiveness).inject({}) { |h, el| h.merge([el].to_h) }
-                resource2.update(resource_stat_ids: Alignments::ResourceStat.where(resource_id: resource2.id).pluck(:id),
+                resource2.update_columns(resource_stat_ids: Alignments::ResourceStat.where(resource_id: resource2.id).pluck(:id),
                                 efficacy: stats)
               end
 
@@ -825,7 +825,8 @@ module Minerva
           it 'returns resources with all fields' do
             t = FactoryBot.create(:taxonomy, identifier: 'CCSS.Math.Content.2.G.A.1', min_age: 6, max_age: 7)
             FactoryBot.create(:alignment, resource: resource, taxonomy: t)
-            resource.update(min_age: 6, max_age: 7, resource_stat_ids: [resource_stat.id], direct_taxonomy_ids: resource.taxonomy_ids)
+            resource.update_columns(min_age: 6, max_age: 7, resource_stat_ids: [resource_stat.id],
+                                    direct_taxonomy_ids: resource.taxonomy_ids, efficacy: { resource_stat.taxonomy.identifier => 77 })
             fields = Minerva::Search::FieldMap.instance.field_map.map { |_k, v| v.output_field }.uniq.compact.join(',')
             params.merge!(limit: 1, fields: fields)
             action.call

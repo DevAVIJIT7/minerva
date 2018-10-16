@@ -43,7 +43,7 @@ module Minerva
     validates :time_required, numericality: { greater_than: 0 }, allow_nil: true
     validate :validate_model
 
-    private
+    after_update :update_denormalized_fields
 
     def self.update_denormalized_data(ids)
       Minerva::Resource.where(id: ids).update_all("
@@ -60,7 +60,12 @@ module Minerva
       efficacy = (SELECT replace(replace(replace(json_agg(CASE WHEN resource_stats.taxonomy_ident IS NOT NULL THEN json_build_object(taxonomies.identifier, resource_stats.effectiveness) ELSE '{}'::json END)::text, '}, {', ', '), ']', ''), '[', '')::jsonb
                  FROM resource_stats INNER JOIN alignments ON resource_stats.taxonomy_id = alignments.taxonomy_id INNER JOIN taxonomies ON taxonomies.id = alignments.taxonomy_id WHERE alignments.resource_id = resources.id)")
     end
+    
+    private
 
+    def update_denormalized_fields
+      self.class.update_denormalized_data([self.id])
+    end
 
     def validate_model
       if text_complexity && (!text_complexity.is_a?(Hash) || (text_complexity.keys.map(&:to_s) - TEXT_COMPLEXITY).present?)
