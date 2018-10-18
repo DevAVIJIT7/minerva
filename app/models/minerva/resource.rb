@@ -18,8 +18,6 @@ module Minerva
   class Resource < ApplicationRecord
     self.table_name = :resources
 
-    include Minerva.configuration.model_extensions[:resource] if Minerva.configuration.model_extensions.try(:[], :resource)
-
     EDUCATIONAL_AUDIENCE = %w[student teacher administrator parent aide proctor guardian relative].freeze
     ACCESSIBILITY_API = %w[AndroidAccessibility ARIAv1 ATK AT-SPI BlackberryAccessibility iAccessible2 JavaAccessibility MacOSXAccessibility MSAA UIAutomation].freeze
     ACCESSIBILITY_INPUT_METHODS = %w[fullKeyboardControl fullMouseControl].freeze

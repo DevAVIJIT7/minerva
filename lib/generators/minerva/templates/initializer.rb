@@ -33,12 +33,4 @@ Minerva.configure do |config|
       controller.render(:json => "Forbidden", :status => 403, :layout => false)
     end
   end
-
-  # To extend resource model you need specify module, it will be added to resource model
-  # config.model_extensions = { resource: ResourceExtender }
-
-  # To extend resource serializer you need specify module, it will be added to resource serializer
-  # config.serializer_extensions = { resource_serializer: ResourceSerializerExtender }
-  config.model_extensions = { }
-  config.serializer_extensions = { }
 end

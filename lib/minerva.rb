@@ -3,11 +3,11 @@
 require 'active_model_serializers'
 require 'chronic_duration'
 require 'faraday'
-require 'rails_admin'
 require 'extensions/object'
 require 'hair_trigger'
 require 'minerva/configuration'
 require 'minerva/engine'
+require 'rails_admin'
 
 module Minerva
   class << self

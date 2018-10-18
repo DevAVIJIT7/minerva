@@ -2,8 +2,8 @@
 
 module Minerva
   class Configuration
-    attr_accessor :extension_fields, :authorizer, :model_extensions, :serializer_extensions,
-                  :search_by_taxonomy_aliases, :filter_sql_proc, :admin_auth_proc
+    attr_accessor :extension_fields, :authorizer, :search_by_taxonomy_aliases,
+                  :filter_sql_proc, :admin_auth_proc
 
     def initialize
       @extension_fields = []
@@ -14,9 +14,7 @@ module Minerva
           controller.render(:json => "Forbidden", :status => 403, :layout => false)
         end
       end
-      @model_extensions = {}
       @search_by_taxonomy_aliases = true
-      @serializer_extensions = {}
     end
   end
 end
