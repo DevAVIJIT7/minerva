@@ -20,6 +20,7 @@ module Minerva
   module FieldTypes
     class Timestamp < Base
       def to_sql(clause, _ops = {})
+        unique_field = generate_uniq_field
         query = if null_check(clause)
                   null_clause(clause)
                 else

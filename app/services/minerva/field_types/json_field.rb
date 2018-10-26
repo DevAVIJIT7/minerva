@@ -29,6 +29,7 @@ module Minerva
       end
 
       def to_sql(clause, _ops = {})
+        unique_field = generate_uniq_field
         query =
           if null_check(clause)
             case subkey_type

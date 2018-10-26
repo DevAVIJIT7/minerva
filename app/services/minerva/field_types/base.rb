@@ -36,15 +36,11 @@ module Minerva
         raise NotImplementedError
       end
 
-      private
-
       def generate_uniq_field
         "#{query_field.tr('.', '_')}_#{rand(10**10)}"
       end
 
-      def unique_field
-        @unique_field ||= generate_uniq_field
-      end
+      private
 
       def null_check(clause)
         clause.value.present? && clause.value.casecmp('null').zero?

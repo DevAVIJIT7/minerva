@@ -20,6 +20,7 @@ module Minerva
   module FieldTypes
     class StringArray < Base
       def to_sql(clause, _ops = {})
+        unique_field = generate_uniq_field
         query = if null_check(clause)
                   "array_length(#{query_field}, 1) IS #{clause.operator == '<>' ? 'NOT ' : ''}NULL #{clause.operator == '<>' ? 'AND' : 'OR'} " \
                 "array_length(#{query_field}, 1) #{clause.operator == '<>' ? '>' : '='} 0"
