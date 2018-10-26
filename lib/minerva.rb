@@ -7,6 +7,7 @@ require 'extensions/object'
 require 'hair_trigger'
 require 'minerva/configuration'
 require 'minerva/engine'
+require 'google/apis/youtube_v3'
 require 'rails_admin'
 
 module Minerva

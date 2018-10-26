@@ -27,6 +27,7 @@ Gem::Specification.new do |s|
   s.add_dependency 'rails', '~> 5.1.6'
   s.add_dependency 'virtus'
   s.add_dependency 'rails_admin', '~> 1.4.2'
+  s.add_dependency 'google-api-client', '~> 0.24.3'
 
   s.add_development_dependency 'byebug'
   s.add_development_dependency 'database_cleaner'

@@ -1,0 +1,15 @@
+= form_tag import_from_youtube_path(@abstract_model), :multipart => true, class: 'form-horizontal denser' do
+  .form-group.control-group
+    %label.col-sm-2.control-label{for: "youtube_channel"}= t("admin.import_from_youtube.youtube_channel")
+    .col-sm-10.controls
+      = text_field_tag :youtube_channel, nil, placeholder: 'Enter channel id', class: "form-control"
+
+  %br
+  .form-actions
+    %input{type: :hidden, name: 'return_to', value: (request.params[:return_to].presence || request.referer)}
+    %button.btn.btn-primary{type: "submit", name: "commit", data: {disable_with: "Starting the job..."} }
+      %i.icon-white.icon-ok
+      = t("admin.form.save")
+    %button.btn{type: "submit", name: "_continue"}
+      %i.icon-remove
+      = t("admin.form.cancel")

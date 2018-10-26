@@ -1,7 +1,13 @@
 en:
   admin:
     actions:
+      import_from_youtube:
+        youtube_channel: Youtube channel id
+        title: Youtube import
+        breadcrumb: Youtube import
+        menu: Youtube import
       import:
+        file: CSV file
         title: Import
         breadcrumb: Import
         menu: Import

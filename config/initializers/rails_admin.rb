@@ -29,13 +29,35 @@ module RailsAdmin
                 flash[:success] = "Successful import"
               end
             end
-
             render action: @action.template_name
           end
         end
-
       end
 
+      class ImportFromYoutube < RailsAdmin::Config::Actions::Base
+        RailsAdmin::Config::Actions.register(self)
+        register_instance_option :collection do
+          true
+        end
+
+        register_instance_option :link_icon do
+          "icon-play"
+        end
+
+        register_instance_option :http_methods do
+          [:get, :post]
+        end
+
+        register_instance_option :controller do
+          proc do
+            if request.post?
+              Minerva::YoutubeJob.perform_later(params[:youtube_channel])
+              flash[:success] = "The job was started"
+            end
+            render action: @action.template_name
+          end
+        end
+      end
     end
   end
 end
@@ -55,6 +77,11 @@ RailsAdmin.config do |config|
     delete
     import do
       only Minerva::Resource
+    end
+    if ENV['YOUTUBE_API_KEY']
+      import_from_youtube do
+        only Minerva::Resource
+      end
     end
   end
 
