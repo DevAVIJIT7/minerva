@@ -22,10 +22,6 @@ module Minerva
       def to_sql(clause, _ops = {})
         query = if null_check(clause)
                   null_clause(clause)
-                elsif greater_than_check(clause.operator)
-                  "#{query_field} #{clause.operator} :#{unique_field} AND #{query_field} <= (CURRENT_TIMESTAMP + INTERVAL '1 day')"
-                elsif less_than_check(clause.operator)
-                  "#{query_field} #{clause.operator} :#{unique_field} AND #{query_field} >= '0001-01-01'"
                 else
                   "#{query_field} #{clause.operator} :#{unique_field}"
                 end

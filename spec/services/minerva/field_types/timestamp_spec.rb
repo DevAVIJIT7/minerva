@@ -30,7 +30,7 @@ module Minerva
         it 'filters using >, >=' do
           %w[> >=].each do |op|
             result = target.to_sql(double(value: '2018-07-23', operator: op))
-            expect(result.sql).to match(/resources.created_at #{op} :resources_created_at_\d+ AND resources.created_at <= \(CURRENT_TIMESTAMP \+ INTERVAL '1 day'\)/)
+            expect(result.sql).to match(/resources.created_at #{op} :resources_created_at_\d+/)
             expect(result.sql_params.keys.count).to eq(1)
             expect(result.sql_params.values.first).to eq('2018-07-23')
           end
@@ -39,7 +39,7 @@ module Minerva
         it 'filters using <, <=' do
           %w[< <=].each do |op|
             result = target.to_sql(double(value: '2018-07-23', operator: op))
-            expect(result.sql).to match(/resources.created_at #{op} :resources_created_at_\d+ AND resources.created_at >= '0001-01-01'/)
+            expect(result.sql).to match(/resources.created_at #{op} :resources_created_at_\d+/)
             expect(result.sql_params.keys.count).to eq(1)
             expect(result.sql_params.values.first).to eq('2018-07-23')
           end
