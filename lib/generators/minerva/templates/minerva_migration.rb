@@ -87,7 +87,7 @@ class CreateMinervaTables < MIGRATION_CLASS
       t.integer 'min_age'
       t.integer 'max_age'
       t.float 'rating'
-      t.float 'embeddable', null: false, default: false
+      t.boolean 'embeddable', null: false, default: false
       t.string 'youtube_id'
       t.string 'thumbnail'
       t.float 'relevance'
