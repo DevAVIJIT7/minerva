@@ -84,6 +84,7 @@ class CreateMinervaTables < MIGRATION_CLASS
       t.integer 'resource_stat_ids', default: [], null: false, array: true
       t.integer 'all_subject_ids', default: [], null: false, array: true
       t.jsonb 'efficacy'
+      t.integer 'avg_efficacy', default: 0
       t.integer 'min_age'
       t.integer 'max_age'
       t.float 'rating'
@@ -178,12 +179,12 @@ class CreateMinervaTables < MIGRATION_CLASS
       t.index ['taxonomy_id'], name: 'index_taxonomy_mappings_taxonomy_id'
     end
 
-    create_trigger.on(:resources).after(:update).of(:name, :description) do
-      "UPDATE resources SET tsv_text = to_tsvector('english'::regconfig, COALESCE(NEW.name, ''::character varying)::text) || to_tsvector('english'::regconfig, COALESCE(NEW.description, ''::text)) WHERE id = NEW.id;"
+    create_trigger.on(:resources).after(:update).of(:name, :description, :all_subject_ids) do
+      "UPDATE resources SET tsv_text = to_tsvector('english'::regconfig, COALESCE(NEW.name, ''::character varying)::text) || to_tsvector('english'::regconfig, COALESCE(NEW.description, ''::text))  || to_tsvector('english'::regconfig, (SELECT COALESCE(string_agg(name, ' '), ''::text) from subjects where id = ANY(NEW.all_subject_ids))) WHERE id = NEW.id;"
     end
 
     create_trigger.on(:resources).after(:insert) do
-      "UPDATE resources SET tsv_text = to_tsvector('english'::regconfig, COALESCE(NEW.name, ''::character varying)::text) || to_tsvector('english'::regconfig, COALESCE(NEW.description, ''::text)) WHERE id = NEW.id;"
+      "UPDATE resources SET tsv_text = to_tsvector('english'::regconfig, COALESCE(NEW.name, ''::character varying)::text) || to_tsvector('english'::regconfig, COALESCE(NEW.description, ''::text))  || to_tsvector('english'::regconfig, (SELECT COALESCE(string_agg(name, ' '), ''::text) from subjects where id = ANY(NEW.all_subject_ids))) WHERE id = NEW.id;"
     end
   end
 end
