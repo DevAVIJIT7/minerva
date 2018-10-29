@@ -9,6 +9,7 @@ require 'minerva/configuration'
 require 'minerva/engine'
 require 'google/apis/youtube_v3'
 require 'rails_admin'
+require 'swagger_ui_engine'
 
 module Minerva
   class << self
