@@ -17,9 +17,9 @@
 require 'rails_helper'
 
 module Minerva
-  describe FieldTypes::Search do
+  describe FieldTypes::SearchField do
     let(:target) do
-      FieldTypes::Search.new('search', nil, nil, query_field: 'tsv_text', custom_search: true)
+      FieldTypes::SearchField.new('search', nil, nil, query_field: 'tsv_text', custom_search: true)
     end
 
     describe '#to_sql' do

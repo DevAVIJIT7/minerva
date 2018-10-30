@@ -18,7 +18,7 @@ require_relative 'base'
 
 module Minerva
   module FieldTypes
-    class Search < Base
+    class SearchField < Base
 
       def to_sql(clause, _ops = {})
         val = clause.value.delete('%').downcase
