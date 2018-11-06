@@ -34,7 +34,8 @@ module Minerva
       def to_sql
         sql_result = field.to_sql(self, ops)
 
-        FieldTypes::SqlResult.new(sql: " #{cond_operator} #{lparen} (#{sql_result.sql}) #{rparen}", sql_params: sql_result.sql_params, joins: sql_result.joins)
+        FieldTypes::SqlResult.new(sql: " #{cond_operator} #{lparen} (#{sql_result.sql}) #{rparen}",
+                                  sql_params: sql_result.sql_params, sort_by_sql: sql_result.sort_by_sql)
       end
     end
   end

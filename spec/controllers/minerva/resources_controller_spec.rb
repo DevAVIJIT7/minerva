@@ -194,6 +194,28 @@ module Minerva
               action.call
               expect(json_response['resources'].count).to eq(1)
             end
+
+            context 'sorting' do
+              let!(:resource2) { FactoryBot.create(:game, name: 'test',
+                                                   description: 'Topics in mathematics that every educated person needs to know to process, evaluate, and understand the numerical and graphical information in our society. Applications of mathematics in problem solving, finance, probability, statistics, geometry, population growth.') }
+              before do
+                resource.update(name: 'Mathematics')
+                params.merge!(filter: "search~'mathematics'", sort: 'relevance' )
+              end
+
+              specify 'asc' do
+                params.merge!(orderBy: 'asc' )
+                action.call
+                expect(json_response['resources'].map {|x| x['id']}).to eq([resource.id, resource2.id])
+              end
+
+              specify 'desc' do
+                params.merge!(orderBy: 'desc' )
+                action.call
+                expect(json_response['resources'].map {|x| x['id']}).to eq([resource2.id, resource.id])
+              end
+            end
+
           end
 
           describe 'searching subject' do
@@ -913,7 +935,7 @@ module Minerva
             expect(response).to be_successful
             expect(json_response['resources'].count).to eq(1)
             expect(json_response['Severity']).to eq('warning')
-            expect(json_response['Description']).to eq('Use any of name, description, publisher, efficacy, learningResourceType, language, rating, publishDate, timeRequired, author for sorting parameter')
+            expect(json_response['Description']).to eq('Use any of relevance, name, description, publisher, efficacy, learningResourceType, language, rating, publishDate, timeRequired, author for sorting parameter')
           end
 
           specify 'for wrong orderBy (should be asc/desc)' do

@@ -58,7 +58,7 @@ module Minerva
         end
 
         @minerva_map = [
-          FieldTypes::SearchField.new('search', nil, nil, query_field: 'tsv_text', custom_search: true),
+          FieldTypes::SearchField.new('search', nil, nil, query_field: 'tsv_text', custom_search: true, is_sortable: true, sort_name: 'relevance'),
           FieldTypes::CaseInsensitiveString.new('name', 'resources.name', :name, is_sortable: true),
           FieldTypes::CaseInsensitiveString.new('description', 'resources.description', :description, is_sortable: true),
           FieldTypes::CaseInsensitiveString.new('publisher', 'resources.publisher', :publisher, is_sortable: true),

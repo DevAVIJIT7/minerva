@@ -49,12 +49,7 @@ module Minerva
         end
 
         resources = Resource.select("#{fields}").where(tf[:where])
-        if sort[:json_key]
-          raise ArgumentError.new("Unspecified field type for json sorting") if sort[:sort_field].field_type.blank?
-          resources = resources.order("(#{sort[:sort_field].query_field}->>'#{sort[:json_key]}')::#{sort[:sort_field].field_type} #{order_by} NULLS LAST")
-        else
-          resources = resources.order("#{sort[:sort_field].query_field} #{order_by} NULLS LAST")
-        end
+        resources, sort_warning = sort_resources(resources, tf)
 
         global_filter = Minerva.configuration.filter_sql_proc.call(resource_owner_id) if Minerva.configuration.filter_sql_proc
         resources = resources.where(global_filter) if global_filter
@@ -62,7 +57,8 @@ module Minerva
         total_count = (global_filter ? cnt_query.where(global_filter) : cnt_query).count
 
         result = PaginationService.new(resources, total_count).page(limit, offset)
-        result.warning = warning
+        result.warning = warning.presence || sort_warning
+
         result
 
       rescue Parslet::ParseFailed
@@ -72,20 +68,38 @@ module Minerva
 
       private
 
+      def sort_resources(resources, tf)
+        warning = {}
+        if sort[:json_key]
+          raise ArgumentError.new("Unspecified field type for json sorting") if sort[:sort_field].field_type.blank?
+          resources = resources.order("(#{sort[:sort_field].query_field}->>'#{sort[:json_key]}')::#{sort[:sort_field].field_type} #{order_by} NULLS LAST")
+        elsif tf[:sort_override]
+
+          resources = resources.order("#{tf[:sort_override]} #{order_by} NULLS LAST")
+        else
+          if sort[:sort_field].sort_name == 'relevance' && tf[:sort_override].nil?
+            warning = { Severity: :warning, CodeMinor: :invalid_sort_field,
+                        Description: "Use relevance for sort only if you use 'search' in filter param" }
+          end
+          resources = resources.order("#{sort[:sort_field].query_field} #{order_by} NULLS LAST")
+        end
+        [resources, warning]
+      end
+
       def transform(filter, ctx)
         return { where: '' } if filter.blank?
         clause_string = ''
-        joins_string = []
         clause_values   = {}
+        sort_override = nil
         query_parse     = Search::Parser.new.parse(filter)
         query_transform = [Search::QueryTransformer.new.apply(query_parse, ctx)].flatten
         query_transform.each do |el|
           clause_string += el.sql
           clause_values.merge!(el.sql_params)
-          joins_string << (el.joins || '')
+          sort_override ||= el.sort_by_sql
         end
 
-        { where: [clause_string, clause_values] }
+        { where: [clause_string, clause_values], sort_override: sort_override }
       end
 
       def check_value(value, default, max)

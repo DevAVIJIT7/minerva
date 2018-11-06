@@ -28,7 +28,7 @@ module Minerva
     reload_attributes
 
     def include_attr?(field)
-      if !instance_options[:warning].present? && instance_options[:fields].present?
+      if instance_options[:warning][:CodeMinor] != :invalid_selection_field && instance_options[:fields].present?
         instance_options[:fields].include?(field.output_field.to_s)
       else
         true

@@ -21,8 +21,9 @@ module Minerva
     class SqlResult
       include Virtus.value_object
       values do
-        attribute :joins, String, default: ''
         attribute :sql, String
+        attribute :sort_by_sql, String
+
         attribute :sql_params, Hash, default: {}
       end
     end
