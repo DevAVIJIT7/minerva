@@ -31,7 +31,7 @@ module Minerva
             end
             ids.present? ? "(all_subject_ids && ARRAY[#{ids}])" : "1=0"
           end
-        SqlResult.new(sql: query)
+        SqlResult.new(sql: query, tsv_column: tsv_column, value: clause.value)
       end
     end
   end

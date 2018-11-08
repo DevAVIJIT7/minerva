@@ -18,16 +18,17 @@ module Minerva
   module Search
     class Clause
       attr_accessor :operator, :field, :value, :unique_field, :cond_operator,
-                    :lparen, :rparen, :ops
+                    :lparen, :rparen, :ops, :original_value
 
       def initialize(clause, ops)
-        sanitizer          = Sanitize.new(field: clause[:field].first[:term], operator: clause[:field].last[:operator], value: clause[:phrase].last[:term], cond_operator: clause[:cond_operator])
-        self.operator      = sanitizer.operator
-        self.field         = sanitizer.field
-        self.value         = sanitizer.value
-        self.cond_operator = sanitizer.cond_operator if sanitizer.try(:cond_operator).present?
-        self.lparen        = clause[:lparen].present? ? clause[:lparen].to_s : ''
-        self.rparen        = clause[:rparen].present? ? clause[:rparen].to_s : ''
+        sanitizer           = Sanitize.new(field: clause[:field].first[:term], operator: clause[:field].last[:operator], value: clause[:phrase].last[:term], cond_operator: clause[:cond_operator])
+        self.operator       = sanitizer.operator
+        self.field          = sanitizer.field
+        self.value          = sanitizer.value
+        self.original_value = clause[:phrase].last[:term]
+        self.cond_operator  = sanitizer.cond_operator if sanitizer.try(:cond_operator).present?
+        self.lparen         = clause[:lparen].present? ? clause[:lparen].to_s : ''
+        self.rparen         = clause[:rparen].present? ? clause[:rparen].to_s : ''
         self.ops = ops
       end
 
@@ -35,7 +36,8 @@ module Minerva
         sql_result = field.to_sql(self, ops)
 
         FieldTypes::SqlResult.new(sql: " #{cond_operator} #{lparen} (#{sql_result.sql}) #{rparen}",
-                                  sql_params: sql_result.sql_params, sort_by_sql: sql_result.sort_by_sql)
+                                  sql_params: sql_result.sql_params, tsv_column: sql_result.tsv_column,
+                                  value: original_value.to_s)
       end
     end
   end

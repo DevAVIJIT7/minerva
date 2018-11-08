@@ -61,7 +61,7 @@ module Minerva
       private
 
       def all_sql_fields
-        'resources.id, ' + FieldMap.instance.field_map.values.map(&:select_sql).flatten.compact.uniq.join(', ')
+        ['resources.id'] + FieldMap.instance.field_map.values.map(&:select_sql).flatten.compact.uniq
       end
 
       def valid_fields
@@ -144,7 +144,7 @@ module Minerva
       def check_sort(attrs)
         return {} unless attrs[:sort].present?
         sort_key, json_key = attrs[:sort].split(':')
-        sort_fields = FieldMap.instance.field_map.select { |_k, v| v.is_sortable }.values.index_by(&:sort_name)
+        sort_fields = FieldMap.instance.field_map.select { |_k, v| v.is_sortable }
         sort = sort_fields[sort_key]
         unless sort
           warning = { Severity: :warning, CodeMinor: :invalid_sort_field, Description: "Use any of #{sort_fields.keys.join(', ')} for sorting parameter" }

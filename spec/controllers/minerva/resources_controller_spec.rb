@@ -46,7 +46,7 @@ module Minerva
                  thumbnail_url: 'https://images-staging.opened.com/pictures/1890960/image20170920-4-1ckjl84.jpg?1505872718',
                  text_complexity: { 'flesch-kincaid' => '1', 'lexile' => '2' },
                  author: '', publisher: 'patrickJMT', use_rights_url: 'some_url', time_required: 278.0, technical_format: 'text', extensions: {},
-                 rating: 3.0, relevance: 0.0,
+                 rating: 3.0,
                  lti_link: { 'title' => 'https://www.opened.io/resources/1890960', 'launch_url' => 'https://www.opened.io/resources/1890960',
                              'description' => '', 'extension' => '', 'secure_launch_url' => '', 'icon' => '', 'secure_icon' => '',
                              'vendor' => { 'code' => 'NULL', 'name' => 'OpenEd' },
@@ -836,7 +836,7 @@ module Minerva
               'accessMode' => %w[orientation color textOnImage position visual],
               'publishDate' => resource.created_at.iso8601(3),
               'rating' => '0',
-              'relevance' => 0,
+              'relevance' => 1,
 
               # Non-essential traits
               'extensions' => {},
@@ -935,7 +935,7 @@ module Minerva
             expect(response).to be_successful
             expect(json_response['resources'].count).to eq(1)
             expect(json_response['Severity']).to eq('warning')
-            expect(json_response['Description']).to eq('Use any of relevance, name, description, publisher, efficacy, learningResourceType, language, rating, publishDate, timeRequired, author for sorting parameter')
+            expect(json_response['Description']).to eq('Use any of search, name, description, publisher, efficacy, learningResourceType, language, rating, publishDate, timeRequired, author, relevance for sorting parameter')
           end
 
           specify 'for wrong orderBy (should be asc/desc)' do

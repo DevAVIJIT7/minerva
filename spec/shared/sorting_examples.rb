@@ -17,7 +17,7 @@
 module SortingExamples
   shared_examples 'sorting_examples' do
     let(:sortable_fields) do
-      Minerva::Search::FieldMap.instance.field_map.values.select(&:is_sortable).map do |field|
+      Minerva::Search::FieldMap.instance.field_map.values.select{ |x| x.is_sortable && x.query_field != 'relevance' }.map do |field|
         [field.query_field.split('.').last, field.filter_field]
       end
     end
@@ -46,7 +46,7 @@ module SortingExamples
 
     context "when orderBY is set to 'desc'" do
       it 'sorts in descending order' do
-        sortable_fields.each do |field, lti_field|
+        sortable_fields .each do |field, lti_field|
           params.merge!(sort: lti_field, orderBy: 'desc')
 
           resource.send(field + '=', '1')

@@ -24,6 +24,8 @@ module Minerva
       DEFAULT_LIMIT  = 100
       DEFAULT_OFFSET = 0
 
+      RELEVANCE = 'relevance'
+
       MAX_LIMIT      = 100
       MAX_OFFSET     = 100_000
 
@@ -44,20 +46,29 @@ module Minerva
       def perform
         tf = transform(filter, expand_objectives: params.fetch('extensions.expandObjectives', false))
 
+        0.upto(fields.length - 1) do |i|
+          if fields[i].include?(RELEVANCE)
+            tsv_columns = tf[:filter_items]&.select(&:tsv_column)&.map(&:tsv_column)&.join(' || ')
+            tsv_vals = tf[:filter_items]&.select(&:tsv_column)&.map(&:value)&.join(' ')
+            if tsv_columns.present? && tsv_vals.present?
+              fields[i] = "LEAST(1, ts_rank_cd(#{tsv_columns}, plainto_tsquery(#{ActiveRecord::Base.connection.quote(tsv_vals)}))) AS #{RELEVANCE}"
+            end
+          end
+        end
+
         if fields.is_a?(Array)
           self.fields = self.fields.join(',')
         end
 
         resources = Resource.select("#{fields}").where(tf[:where])
-        resources, sort_warning = sort_resources(resources, tf)
-
+        resources = sort_resources(resources, tf)
         global_filter = Minerva.configuration.filter_sql_proc.call(resource_owner_id) if Minerva.configuration.filter_sql_proc
         resources = resources.where(global_filter) if global_filter
         cnt_query = Resource.where(tf[:where])
         total_count = (global_filter ? cnt_query.where(global_filter) : cnt_query).count
 
         result = PaginationService.new(resources, total_count).page(limit, offset)
-        result.warning = warning.presence || sort_warning
+        result.warning = warning
 
         result
 
@@ -69,37 +80,35 @@ module Minerva
       private
 
       def sort_resources(resources, tf)
-        warning = {}
         if sort[:json_key]
           raise ArgumentError.new("Unspecified field type for json sorting") if sort[:sort_field].field_type.blank?
           resources = resources.order("(#{sort[:sort_field].query_field}->>'#{sort[:json_key]}')::#{sort[:sort_field].field_type} #{order_by} NULLS LAST")
-        elsif tf[:sort_override]
-
-          resources = resources.order("#{tf[:sort_override]} #{order_by} NULLS LAST")
         else
-          if sort[:sort_field].sort_name == 'relevance' && tf[:sort_override].nil?
-            warning = { Severity: :warning, CodeMinor: :invalid_sort_field,
-                        Description: "Use relevance for sort only if you use 'search' in filter param" }
+          tsv_columns = tf[:filter_items]&.select(&:tsv_column)&.map(&:tsv_column)&.join(' || ')
+          tsv_vals = tf[:filter_items]&.select(&:tsv_column)&.map(&:value)&.join(' ')
+          sort_sql = sort[:sort_field].query_field
+          if sort[:sort_field].query_field == RELEVANCE && tsv_columns.present? && tsv_vals.present?
+            sort_sql = "ts_rank_cd(#{tsv_columns}, plainto_tsquery(#{ActiveRecord::Base.connection.quote(tsv_vals)}))"
           end
-          resources = resources.order("#{sort[:sort_field].query_field} #{order_by} NULLS LAST")
+          resources = resources.order("#{sort_sql} #{order_by} NULLS LAST")
         end
-        [resources, warning]
+        resources
       end
 
       def transform(filter, ctx)
         return { where: '' } if filter.blank?
         clause_string = ''
         clause_values   = {}
-        sort_override = nil
+        filter_items = []
         query_parse     = Search::Parser.new.parse(filter)
         query_transform = [Search::QueryTransformer.new.apply(query_parse, ctx)].flatten
         query_transform.each do |el|
           clause_string += el.sql
           clause_values.merge!(el.sql_params)
-          sort_override ||= el.sort_by_sql
+          filter_items << el
         end
 
-        { where: [clause_string, clause_values], sort_override: sort_override }
+        { where: [clause_string, clause_values], filter_items: filter_items }
       end
 
       def check_value(value, default, max)

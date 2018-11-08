@@ -32,6 +32,8 @@ module Minerva
 
       ALL_CLASSES = [Minerva::Resource, Minerva::Alignments::ResourceStat, Minerva::Subject, Minerva::Alignments::Taxonomy].freeze
 
+      RELEVANCE_COLUMNS = %w(tsv_text tsv_name tsv_description tsv_subjects)
+
       def generate_field_map
         minerva_map.select { |x| x.custom_search || @available_columns.include?(x.query_field) }.index_by(&:filter_field)
       end
@@ -58,11 +60,11 @@ module Minerva
         end
 
         @minerva_map = [
-          FieldTypes::SearchField.new('search', nil, nil, query_field: 'tsv_text', custom_search: true, is_sortable: true, sort_name: 'relevance'),
-          FieldTypes::CaseInsensitiveString.new('name', 'resources.name', :name, is_sortable: true),
-          FieldTypes::CaseInsensitiveString.new('description', 'resources.description', :description, is_sortable: true),
+          FieldTypes::SearchField.new('search', nil, nil, query_field: 'tsv_text', custom_search: true, is_sortable: true, tsv_column: 'tsv_text'),
+          FieldTypes::CaseInsensitiveString.new('name', 'resources.name', :name, is_sortable: true, tsv_column: 'tsv_name'),
+          FieldTypes::CaseInsensitiveString.new('description', 'resources.description', :description, is_sortable: true, tsv_column: 'tsv_description'),
           FieldTypes::CaseInsensitiveString.new('publisher', 'resources.publisher', :publisher, is_sortable: true),
-          FieldTypes::Subject.new('subject', SUBJECT_SELECT, :subject, query_field: 'all_subject_ids', custom_search: true),
+          FieldTypes::Subject.new('subject', SUBJECT_SELECT, :subject, query_field: 'all_subject_ids', custom_search: true, tsv_column: 'tsv_subjects'),
           FieldTypes::Efficacy.new('efficacy', 'resources.efficacy', :efficacy,  query_field: 'resources.efficacy', is_sortable: true, field_type: 'int'),
           FieldTypes::LearningObjective.new('learningObjectives', TAXONOMIES_SELECT, :learningObjectives, query_field: 'taxonomies.identifier', as_option: :learning_objectives),
           FieldTypes::LearningObjective.new('learningObjectives.targetName', TAXONOMIES_SELECT, :learningObjectives, as_option: :learning_objectives, query_field: 'taxonomies.identifier'),
@@ -94,6 +96,7 @@ module Minerva
           FieldTypes::CaseInsensitiveString.new('extensions', 'resources.extensions', :extensions),
           FieldTypes::CaseInsensitiveString.new('relevance', 'resources.relevance', :relevance),
           FieldTypes::NullField.new('ltiLink', 'resources.lti_link', :ltiLink, as_option: :lti_link, search_allowed: false, custom_search: true),
+          FieldTypes::NullField.new('relevance', '1', :relevance, query_field: 'relevance', as_option: :relevance, search_allowed: false, custom_search: true, is_sortable: true),
           FieldTypes::CaseInsensitiveString.new('url', 'resources.url', :url, search_allowed: false)
         ] + (Minerva.configuration.extension_fields || [])
       end

@@ -22,8 +22,8 @@ module Minerva
       include Virtus.value_object
       values do
         attribute :sql, String
-        attribute :sort_by_sql, String
-
+        attribute :tsv_column, String
+        attribute :value
         attribute :sql_params, Hash, default: {}
       end
     end

@@ -59,7 +59,9 @@ class CreateMinervaTables < MIGRATION_CLASS
 
     create_table 'resources', id: :serial, force: :cascade do |t|
       t.citext 'name', null: false
+      t.tsvector 'tsv_name'
       t.citext 'description'
+      t.tsvector 'tsv_description'
       t.string 'url', limit: 255
       t.jsonb 'lti_link', default: {}
       t.citext 'learning_resource_type'
@@ -83,6 +85,7 @@ class CreateMinervaTables < MIGRATION_CLASS
       t.integer 'all_taxonomy_ids', default: [], null: false, array: true
       t.integer 'resource_stat_ids', default: [], null: false, array: true
       t.integer 'all_subject_ids', default: [], null: false, array: true
+      t.tsvector 'tsv_subjects'
       t.jsonb 'efficacy'
       t.integer 'avg_efficacy', default: 0
       t.integer 'min_age'
@@ -91,7 +94,6 @@ class CreateMinervaTables < MIGRATION_CLASS
       t.boolean 'embeddable', null: false, default: false
       t.string 'youtube_id'
       t.string 'thumbnail'
-      t.float 'relevance'
       t.tsvector 'tsv_text'
       t.datetime 'created_at', null: false
       t.datetime 'updated_at', null: false
