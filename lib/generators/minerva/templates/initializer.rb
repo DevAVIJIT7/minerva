@@ -26,6 +26,7 @@ Minerva.configure do |config|
   # FieldTypes::CaseInsensitiveString.new('some_field', 'resources.some_field', :some_field, is_sortable: true)]
 
   config.extension_fields = []
+  config.carrierwave_storage = :aws
   config.search_by_taxonomy_aliases = true
 
   config.admin_auth_proc = Proc.new do |controller|

@@ -3,11 +3,12 @@
 module Minerva
   class Configuration
     attr_accessor :extension_fields, :authorizer, :search_by_taxonomy_aliases,
-                  :filter_sql_proc, :admin_auth_proc
+                  :filter_sql_proc, :admin_auth_proc, :carrierwave_storage
 
     def initialize
       @extension_fields = []
       @authorizer = nil
+      @carrierwave_storage = :aws
       @filter_sql_proc = nil
       @admin_auth_proc = Proc.new do |controller|
         controller.authenticate_or_request_with_http_basic('Minerva') do |username, password|

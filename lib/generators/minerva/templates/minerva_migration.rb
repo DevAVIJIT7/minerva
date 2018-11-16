@@ -63,6 +63,7 @@ class CreateMinervaTables < MIGRATION_CLASS
       t.citext 'description'
       t.tsvector 'tsv_description'
       t.string 'url', limit: 255
+      t.string 'cover', limit: 255
       t.jsonb 'lti_link', default: {}
       t.citext 'learning_resource_type'
       t.citext 'language', default: 'en'

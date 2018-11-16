@@ -30,6 +30,8 @@ module Minerva
     has_many :resources_subjects, class_name: 'Minerva::ResourcesSubject', dependent: :destroy
     has_many :subjects, class_name: 'Minerva::Subject', through: :resources_subjects
 
+    mount_uploader :cover, ::Minerva::CoverUploader
+
     validates :learning_resource_type, inclusion:
         { in: ['Assessment/Item', 'Assessment/Formative', 'Assessment/Interim', 'Assessment/Rubric', 'Assessment/Preparation', 'Collection/Course',
                'Collection/Unit', 'Collection/Lesson', 'Collection/Curriculum Guide', 'Game', 'Interactive/Simulation', 'Interactive/Animation',
