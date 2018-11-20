@@ -36,6 +36,7 @@ FactoryBot.define do
     description
     publisher
     url
+    publish_date { DateTime.now }
     learning_resource_type { 'Media/Video' }
   end
 

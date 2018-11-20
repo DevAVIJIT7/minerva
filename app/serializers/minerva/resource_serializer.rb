@@ -124,7 +124,7 @@ module Minerva
     end
 
     def publishDate
-      object.created_at
+      object.publish_date
     end
 
     def author

@@ -81,7 +81,7 @@ class CreateMinervaTables < MIGRATION_CLASS
       t.citext 'accessibility_features', default: [], null: false, array: true
       t.citext 'accessibility_hazards', default: [], null: false, array: true
       t.citext 'access_mode', default: [], null: false, array: true
-      t.datetime 'publish_date'
+      t.date 'publish_date'
       t.integer 'direct_taxonomy_ids', default: [], null: false, array: true
       t.integer 'all_taxonomy_ids', default: [], null: false, array: true
       t.integer 'resource_stat_ids', default: [], null: false, array: true
@@ -91,7 +91,7 @@ class CreateMinervaTables < MIGRATION_CLASS
       t.integer 'avg_efficacy', default: 0
       t.integer 'min_age'
       t.integer 'max_age'
-      t.float 'rating'
+      t.integer 'rating'
       t.boolean 'embeddable', null: false, default: false
       t.string 'youtube_id'
       t.string 'thumbnail'

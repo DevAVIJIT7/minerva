@@ -78,7 +78,7 @@ module Minerva
           FieldTypes::CaseInsensitiveString.new('language', 'resources.language', :language, is_sortable: true),
           FieldTypes::TypicalAgeRange.new('typicalAgeRange', AGE_RANGE_SELECT, :typicalAgeRange, as_option: :typical_age_range, custom_search: true),
           FieldTypes::CaseInsensitiveString.new('rating', 'resources.rating', :rating, is_sortable: true),
-          FieldTypes::Timestamp.new('publishDate', 'resources.created_at', :publishDate, as_option: :created_at, is_sortable: true),
+          FieldTypes::Timestamp.new('publishDate', 'resources.publish_date', :publishDate, as_option: :publish_date, is_sortable: true),
           FieldTypes::Duration.new('timeRequired', 'resources.time_required', :timeRequired, as_option: :time_required, is_sortable: true),
           FieldTypes::CaseInsensitiveString.new('author', 'resources.author', :author, is_sortable: true),
           FieldTypes::CaseInsensitiveString.new('useRightsUrl', 'resources.use_rights_url', :useRightsUrl, as_option: :use_rights_url),
