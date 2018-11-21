@@ -17,7 +17,7 @@
 Minerva.configure do |config|
   # Specify authorization logic, will be executed in before_action
   config.authorizer = proc do |controller|
-    p 'Authorization goes here'
+    #Authorization goes here
   end
 
   # To extend search logic you can specify search fields
@@ -26,7 +26,8 @@ Minerva.configure do |config|
   # FieldTypes::CaseInsensitiveString.new('some_field', 'resources.some_field', :some_field, is_sortable: true)]
 
   config.extension_fields = []
-  config.carrierwave_storage = :aws
+  config.carrierwave = { storage: :aws, versions: [{ name: :large, size_w_h: [500,500] },
+                                                   { name: :medium, size_w_h: [200,200] }] }
   config.search_by_taxonomy_aliases = true
 
   config.admin_auth_proc = Proc.new do |controller|

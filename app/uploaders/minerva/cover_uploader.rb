@@ -2,14 +2,16 @@ module Minerva
   class CoverUploader < CarrierWave::Uploader::Base
     include CarrierWave::MiniMagick
 
-    storage Minerva.configuration.carrierwave_storage
+    storage Minerva.configuration.carrierwave[:storage]
 
-    version :large do
-      process resize_to_fill: [500,500]
+    Minerva.configuration.carrierwave[:versions].each do |v|
+      version v[:name] do
+        process resize_to_fill: v[:size_w_h]
+      end
     end
 
-    version :medium do
-      process resize_to_fill: [200,200]
+    def store_dir
+      "uploads/#{model.class.to_s.underscore}/#{mounted_as}/#{model.id}"
     end
 
   end
