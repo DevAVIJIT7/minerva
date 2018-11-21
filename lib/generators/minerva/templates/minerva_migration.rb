@@ -182,12 +182,5 @@ class CreateMinervaTables < MIGRATION_CLASS
       t.index ['taxonomy_id'], name: 'index_taxonomy_mappings_taxonomy_id'
     end
 
-    create_trigger.on(:resources).after(:update).of(:name, :description, :all_subject_ids) do
-      "UPDATE resources SET tsv_text = to_tsvector('english'::regconfig, COALESCE(NEW.name, ''::character varying)::text) || to_tsvector('english'::regconfig, COALESCE(NEW.description, ''::text))  || to_tsvector('english'::regconfig, (SELECT COALESCE(string_agg(name, ' '), ''::text) from subjects where id = ANY(NEW.all_subject_ids))) WHERE id = NEW.id;"
-    end
-
-    create_trigger.on(:resources).after(:insert) do
-      "UPDATE resources SET tsv_text = to_tsvector('english'::regconfig, COALESCE(NEW.name, ''::character varying)::text) || to_tsvector('english'::regconfig, COALESCE(NEW.description, ''::text))  || to_tsvector('english'::regconfig, (SELECT COALESCE(string_agg(name, ' '), ''::text) from subjects where id = ANY(NEW.all_subject_ids))) WHERE id = NEW.id;"
-    end
   end
 end

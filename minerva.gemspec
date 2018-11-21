@@ -10,7 +10,7 @@ Gem::Specification.new do |s|
   s.name        = 'minerva'
   s.version     = Minerva::VERSION
   s.authors     = ['ACT Inc.']
-  s.email       = ['evgeniyp@claned.com']
+  s.email       = ['ya.petrov.evgeniy@gmail.com']
   s.summary     = 'Resource search engine'
   s.license     = 'Apache'
 

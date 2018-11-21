@@ -834,7 +834,7 @@ module Minerva
               'accessibilityFeatures' => [],
               'accessibilityHazards' => [],
               'accessMode' => %w[orientation color textOnImage position visual],
-              'publishDate' => resource.publish_date.iso8601(3),
+              'publishDate' => resource.publish_date.iso8601,
               'rating' => '0',
               'relevance' => 1,
 
