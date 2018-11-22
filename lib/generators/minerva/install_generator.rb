@@ -29,6 +29,7 @@ module Minerva
 
     def copy_files
       migration_template 'minerva_migration.rb', 'db/migrate/create_minerva_tables.rb'
+      migration_template 'minerva_functions.sql', 'minerva_functions.sql'
     end
 
     def create_initializer_file
