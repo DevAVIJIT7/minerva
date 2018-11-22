@@ -29,12 +29,11 @@ module Minerva
 
     def copy_files
       migration_template 'minerva_migration.rb', 'db/migrate/create_minerva_tables.rb'
-      migration_template 'minerva_functions.sql', 'minerva_functions.sql'
     end
 
     def create_initializer_file
-      init_path = "#{source_paths.first}/initializer.rb"
-      create_file 'config/initializers/minerva.rb', File.read(init_path)
+      create_file 'config/initializers/minerva.rb', File.read("#{source_paths.first}/initializer.rb")
+      create_file 'db/minerva_functions.sql', File.read("#{source_paths.first}/minerva_functions.sql")
     end
   end
 end
