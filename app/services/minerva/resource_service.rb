@@ -39,11 +39,11 @@ module Minerva
     def load_from_csv(csv_string)
       data = CSV.parse(csv_string)
       cols = Resource.columns.index_by(&:name)
-      relation_cols = %w[taxonomies subjects]
+      special_cols = %w[taxonomies subjects remote_cover_url]
       headers = data[0]
       resources = data[1..-1].map do |row|
         res_params = headers.each_with_index.each_with_object({}) do |(col, idx), result|
-          raise ArgumentError, 'wrong column in csv file' if !headers.include?(col) && !relation_cols.include?(col)
+          raise ArgumentError, 'wrong column in csv file' if !headers.include?(col) && !special_cols.include?(col)
           value = row[idx]
           if value.present?
             if col == 'subjects'
