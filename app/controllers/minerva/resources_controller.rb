@@ -56,7 +56,7 @@ module Minerva
 
     def resource_params
       params.permit(:csv_file_url, :csv_file, :name, :description, :url, :learning_resource_type, :language, :thumbnail_url,
-                    :author, :publisher, :use_rights_url, :time_required, :technical_format,
+                    :author, :publisher, :use_rights_url, :time_required, :technical_format, :remote_cover_url,
                     :rating, :relevance, :state, lti_link: {}, text_complexity: {}, extensions: {}, subjects: [], taxonomies: [],
                                                  educational_audience: [], accessibility_api: [], accessibility_input_methods: [], accessibility_features: [], accessibility_hazards: [], access_mode: [])
     end

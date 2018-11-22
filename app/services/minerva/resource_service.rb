@@ -30,7 +30,9 @@ module Minerva
           params[:taxonomy_ids] = params[:direct_taxonomy_ids] = Alignments::Taxonomy.where('lower(identifier) in (:terms) OR lower(opensalt_identifier) in (:terms)',
                                                                  terms: params.delete(:taxonomies)).pluck(:id)
         end
-        [Resource.create!(params)]
+        resource = Resource.create!(params.except(:remote_cover_url))
+        SetCoverJob.perform_later(resource.id, params[:remote_cover_url]) if params[:remote_cover_url].present?
+        [resource]
       end
     end
 
@@ -65,7 +67,9 @@ module Minerva
           end
           result[col] = value
         end
-        Resource.create!(res_params)
+        resource = Resource.create!(res_params.except('remote_cover_url'))
+        SetCoverJob.perform_later(resource.id, res_params['remote_cover_url']) if res_params['remote_cover_url'].present?
+        resource
       end
       Resource.update_denormalized_data(resources.map(&:id))
       resources

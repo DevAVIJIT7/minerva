@@ -50,7 +50,10 @@ module Minerva
           exist_video_ids = Resource.where(youtube_id: video_ids).pluck(:youtube_id)
           response.items.each do |playlist_item|
             attrs = get_video_details(playlist_item, contentDetails)
-            Resource.create!(attrs) unless exist_video_ids.include?(attrs[:youtube_id])
+            unless exist_video_ids.include?(attrs[:youtube_id])
+              resource = Resource.create!(attrs)
+              SetCoverJob.perform_later(resource.id, attrs[:thumbnail_url])
+            end
           end
         end
       end
