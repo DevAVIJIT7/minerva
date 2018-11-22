@@ -119,6 +119,7 @@ RailsAdmin.config do |config|
     end
     edit do
       include_all_fields
+      field :cover, :carrierwave
       [:created_at, :avg_efficacy, :min_age, :max_age, :efficacy].each do |f|
         field f do
           read_only true
