@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.com/openedinc/minerva.svg?branch=master)](https://travis-ci.com/openedinc/minerva)
+
 # Minerva
 Short description and motivation.
 
