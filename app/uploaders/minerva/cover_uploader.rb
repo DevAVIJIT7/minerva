@@ -6,7 +6,7 @@ module Minerva
 
     Minerva.configuration.carrierwave[:versions].each do |v|
       version v[:name] do
-        process resize_to_fill: v[:size_w_h]
+        process resize_to_fit: v[:size_w_h]
       end
     end
 
