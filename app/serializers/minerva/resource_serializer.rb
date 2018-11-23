@@ -42,7 +42,7 @@ module Minerva
     def learningResourceType
       # TODO: Possibly change column "learning_resource_type" to array of multiple
       # resource types and allow searching through the array
-      [object.learning_resource_type || '']
+      [object.learning_resource_type].compact
     end
 
     def url
@@ -68,15 +68,15 @@ module Minerva
     end
 
     def typicalAgeRange
-      object.typical_age_range || ''
+      object.typical_age_range
     end
 
     def useRightsUrl
-      object.use_rights_url || ''
+      object.use_rights_url
     end
 
     def timeRequired
-      return '' unless object.time_required.present?
+      return nil unless object.time_required.present?
 
       "PT#{ChronicDuration.output(object.time_required.to_i, format: :short).delete(' ').upcase}"
     end
@@ -116,7 +116,7 @@ module Minerva
     end
 
     def language
-      [object.language || '']
+      [object.language].compact
     end
 
     def relevance
