@@ -826,7 +826,7 @@ module Minerva
               'author' => [],
               'publisher' => 'publisher',
               'useRightsUrl' => 'http://use_rights_url.com',
-              'timeRequired' => '',
+              'timeRequired' => nil,
               'technicalFormat' => 'text/html',
               'educationalAudience' => ['student'],
               'accessibilityAPI' => [],
