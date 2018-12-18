@@ -160,6 +160,12 @@ module Minerva
               expect(json_response['resources'].count).to eq(1)
             end
 
+            specify "fuzzy search" do
+              params.merge!(limit: 1, filter: "search~'tesp'")
+              action.call
+              expect(json_response['resources'].count).to eq(1)
+            end
+
             specify "= operator" do
               params.merge!(limit: 1, filter: "search='test'")
               action.call
@@ -826,7 +832,7 @@ module Minerva
               'author' => [],
               'publisher' => 'publisher',
               'useRightsUrl' => 'http://use_rights_url.com',
-              'timeRequired' => '',
+              'timeRequired' => nil,
               'technicalFormat' => 'text/html',
               'educationalAudience' => ['student'],
               'accessibilityAPI' => [],

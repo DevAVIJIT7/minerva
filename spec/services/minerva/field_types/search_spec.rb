@@ -40,13 +40,13 @@ module Minerva
       context 'other operators, not null checks' do
         specify '=' do
           result = target.to_sql(double(value: 'something', operator: '='))
-          expect(result.sql).to match(/\(resources.tsv_text @@ plainto_tsquery\(:tsv_text_\d+\)\)/)
+          expect(result.sql).to match(/\(resources.tsv_text @@ plainto_tsquery\(:tsv_text_\d+\) OR resources.name % \(:tsv_text_\d+\)\)/)
           expect(result.sql_params.values.first).to eq('something')
         end
 
         specify '!=' do
           result = target.to_sql(double(value: 'something', operator: '<>'))
-          expect(result.sql).to match(/NOT \(resources.tsv_text @@ plainto_tsquery\(:tsv_text_\d+\)\)/)
+          expect(result.sql).to match(/NOT \(resources.tsv_text @@ plainto_tsquery\(:tsv_text_\d+\) OR resources.name % \(:tsv_text_\d+\)\)/)
           expect(result.sql_params.values.first).to eq('something')
         end
       end

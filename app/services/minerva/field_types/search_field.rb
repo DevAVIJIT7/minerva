@@ -24,12 +24,11 @@ module Minerva
         val = clause.value.delete('%').downcase
         unique_field = generate_uniq_field
         sql_params = {}
-        sort_sql = nil
         query = if null_check(clause)
                    null_clause(clause)
                 else
                   sql_params = { unique_field.to_sym => val }
-                  "#{clause.operator == '<>' ? 'NOT ' : ''}(resources.tsv_text @@ plainto_tsquery(:#{unique_field}))"
+                  "#{clause.operator == '<>' ? 'NOT ' : ''}(resources.tsv_text @@ plainto_tsquery(:#{unique_field}) OR resources.name % (:#{unique_field}))"
                 end
 
         SqlResult.new(sql: query, sql_params: sql_params, tsv_column: tsv_column, value: val)
