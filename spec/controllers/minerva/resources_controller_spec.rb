@@ -728,6 +728,20 @@ module Minerva
               expect(json_response['resources'][0]['typicalAgeRange']).to eq('6-7')
             end
 
+            it 'returns some resources for right corner interval' do
+              params.merge!(limit: 1, filter: 'typicalAgeRange="7-8"')
+              action.call
+              expect(json_response['resources'].count).to eq(1)
+              expect(json_response['resources'][0]['typicalAgeRange']).to eq('6-7')
+            end
+
+            it 'returns some resources for left corner interval' do
+              params.merge!(limit: 1, filter: 'typicalAgeRange="4-6"')
+              action.call
+              expect(json_response['resources'].count).to eq(1)
+              expect(json_response['resources'][0]['typicalAgeRange']).to eq('6-7')
+            end
+
             it 'returns some resources with wider interval' do
               params.merge!(limit: 1, filter: 'typicalAgeRange="5-8"')
               action.call

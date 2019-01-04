@@ -29,7 +29,7 @@ module Minerva
               end
             else
               values = clause.value.split('-').map(&:to_i)
-              "((resources.min_age <= #{values.first} AND resources.max_age >= #{values.last}) OR (resources.min_age >= #{values.first} AND resources.max_age <= #{values.last}))".squish
+              "(resources.min_age <= #{values.max} AND resources.max_age >= #{values.min})".squish
             end
         SqlResult.new(sql: query)
       end
