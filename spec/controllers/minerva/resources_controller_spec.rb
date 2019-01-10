@@ -707,6 +707,14 @@ module Minerva
               resource.update(min_age: 6, max_age: 7)
             end
 
+            it 'shows correct age range' do
+              resource.update(min_age: 6, max_age: 6)
+              params.merge!(limit: 1, filter: 'typicalAgeRange="6-7"')
+              action.call
+              expect(json_response['resources'].count).to eq(1)
+              expect(json_response['resources'][0]['typicalAgeRange']).to eq('6')
+            end
+
             it 'returns some resources with direct match' do
               params.merge!(limit: 1, filter: 'typicalAgeRange="6-7"')
               action.call
