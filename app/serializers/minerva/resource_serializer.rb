@@ -76,7 +76,8 @@ module Minerva
     end
 
     def timeRequired
-      return nil unless object.time_required.present?
+      return nil if object.time_required.blank? || object.time_required == 0
+
 
       "PT#{ChronicDuration.output(object.time_required.to_i, format: :short).delete(' ').upcase}"
     end
