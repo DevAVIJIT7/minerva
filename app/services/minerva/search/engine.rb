@@ -51,7 +51,7 @@ module Minerva
             tsv_columns = tf[:filter_items]&.select(&:tsv_column)&.map(&:tsv_column)&.join(' || ')
             tsv_vals = tf[:filter_items]&.select(&:tsv_column)&.map(&:value)&.join(' ')
             if tsv_columns.present? && tsv_vals.present?
-              fields[i] = "LEAST(1, ts_rank_cd(#{tsv_columns}, plainto_tsquery(#{ActiveRecord::Base.connection.quote(tsv_vals)}))) AS #{RELEVANCE}"
+              fields[i] = Arel.sql("LEAST(1, ts_rank_cd(#{tsv_columns}, plainto_tsquery(#{ActiveRecord::Base.connection.quote(tsv_vals)}))) AS #{RELEVANCE}")
             end
           end
         end
@@ -82,7 +82,7 @@ module Minerva
       def sort_resources(resources, tf)
         if sort[:json_key]
           raise ArgumentError.new("Unspecified field type for json sorting") if sort[:sort_field].field_type.blank?
-          resources = resources.order("(#{sort[:sort_field].query_field}->>'#{sort[:json_key]}')::#{sort[:sort_field].field_type} #{order_by} NULLS LAST")
+          resources = resources.order(Arel.sql("(#{sort[:sort_field].query_field}->>'#{sort[:json_key]}')::#{sort[:sort_field].field_type} #{order_by} NULLS LAST"))
         else
           tsv_columns = tf[:filter_items]&.select(&:tsv_column)&.map(&:tsv_column)&.join(' || ')
           tsv_vals = tf[:filter_items]&.select(&:tsv_column)&.map(&:value)&.join(' ')
@@ -93,7 +93,7 @@ module Minerva
             end
             sort_by_id = ", id desc"
           end
-          resources = resources.order("#{sort_sql} #{order_by} NULLS LAST#{sort_by_id}")
+          resources = resources.order(Arel.sql("#{sort_sql} #{order_by} NULLS LAST#{sort_by_id}"))
         end
         resources
       end
