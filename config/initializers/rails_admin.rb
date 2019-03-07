@@ -5,7 +5,8 @@ module RailsAdmin
         RailsAdmin::Config::Actions.register(self)
         register_instance_option :controller do
           proc do
-            if params[:model_name] == 'minerva~resource' && params[:minerva_query].present?
+            minerva_view = params[:model_name] == 'minerva~resource'
+            if minerva_view && params[:minerva_query].present?
               result = Minerva::Search::Engine.new(
                   {filter: "search='#{params[:minerva_query]}'",
                    limit: RailsAdmin::Config.default_items_per_page,
@@ -35,7 +36,7 @@ module RailsAdmin
 
             respond_to do |format|
               format.html do
-                render @action.template_name, status: @status_code || :ok
+                render minerva_view ? :minerva_index : @action.template_name, status: @status_code || :ok
               end
 
               format.json do
