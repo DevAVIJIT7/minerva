@@ -1,5 +1,9 @@
 en:
   admin:
+    misc:
+      filter: Filter
+      minerva_search: Minerva Engine Search
+      search: Search
     actions:
       import_from_youtube:
         youtube_channel: Youtube channel id
