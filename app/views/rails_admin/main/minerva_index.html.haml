@@ -62,7 +62,7 @@
             %i.icon-white.icon-remove
     - if params[:model_name] ==  'minerva~resource'
       = form_tag(index_path(params.except(*%w[page f query minerva_query])), method: :get, class: "pjax-form form-inline") do
-        .input-group
+        .input-group{style: 'width:60%'}
           %input.form-control.input-small{name: "minerva_query", type: "search", value: minerva_query, placeholder: t("admin.misc.minerva_search")}
           %span.input-group-btn
             %button.btn.btn-primary{type: 'submit', :'data-disable-with' => '<i class="icon-white icon-refresh"></i> '.html_safe + t('admin.misc.search')}
