@@ -7,15 +7,12 @@ module RailsAdmin
           proc do
             minerva_view = params[:model_name] == 'minerva~resource'
             if minerva_view && params[:minerva_query].present?
-              result = Minerva::Search::Engine.new(
-                  {filter: params[:minerva_query],
-                   limit: RailsAdmin::Config.default_items_per_page,
-                   offset: (params.fetch(:page, 1).to_i-1) * RailsAdmin::Config.default_items_per_page}, nil)
-                           .perform
-
+              query = Rack::Utils.parse_nested_query(params[:minerva_query]).symbolize_keys
+              query.merge!({limit: RailsAdmin::Config.default_items_per_page,
+                            offset: (params.fetch(:page, 1).to_i-1) * RailsAdmin::Config.default_items_per_page})
+              result = Minerva::Search::Engine.new(query, nil).perform
               current_page = params.fetch(:page, 1).to_i
               total_pages = (result.pagination[:total_count] / (1.0*RailsAdmin::Config.default_items_per_page)).ceil
-
               @objects = Minerva::Resource.where(id: result.resources.map(&:id))
               @objects.define_singleton_method(:total_pages) { total_pages }
               @objects.define_singleton_method(:total_count) { result.pagination[:total_count] }
