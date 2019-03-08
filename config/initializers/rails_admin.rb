@@ -8,7 +8,7 @@ module RailsAdmin
             minerva_view = params[:model_name] == 'minerva~resource'
             if minerva_view && params[:minerva_query].present?
               result = Minerva::Search::Engine.new(
-                  {filter: "search='#{params[:minerva_query]}'",
+                  {filter: params[:minerva_query],
                    limit: RailsAdmin::Config.default_items_per_page,
                    offset: (params.fetch(:page, 1).to_i-1) * RailsAdmin::Config.default_items_per_page}, nil)
                            .perform
