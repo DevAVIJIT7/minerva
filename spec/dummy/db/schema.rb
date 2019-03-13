@@ -77,13 +77,10 @@ ActiveRecord::Schema.define(version: 20_180_823_080_025) do
     t.integer 'resource_stat_ids', default: [], null: false, array: true
     t.integer 'all_subject_ids', default: [], null: false, array: true
     t.tsvector 'tsv_subjects'
-    t.jsonb 'efficacy'
-    t.integer 'avg_efficacy', default: 0
+    t.integer 'efficacy', default: 0
     t.integer 'min_age'
     t.integer 'max_age'
     t.integer 'rating'
-    t.boolean 'embeddable', null: false, default: false
-    t.string 'youtube_id'
     t.string 'thumbnail'
     t.tsvector 'tsv_text'
     t.datetime 'created_at', null: false

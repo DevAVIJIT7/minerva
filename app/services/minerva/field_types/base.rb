@@ -19,7 +19,8 @@ module Minerva
     class Base
 
       attr_accessor :custom_search, :filter_field, :is_sortable, :select_sql,
-                    :as_option, :query_field, :output_field, :search_allowed, :field_type, :tsv_column
+                    :as_option, :query_field, :output_field, :search_allowed, :field_type,
+                    :tsv_column, :is_extension
 
       def initialize(filter_field, select_sql, output_field, ops = {})
         self.filter_field = filter_field
@@ -31,6 +32,7 @@ module Minerva
         self.custom_search = ops.fetch(:custom_search, false)
         self.field_type = ops.fetch(:field_type, nil)
         self.tsv_column = ops.fetch(:tsv_column, nil)
+        self.is_extension = ops.fetch(:is_extension, false)
       end
 
       def to_sql(_clause, _ops = {})

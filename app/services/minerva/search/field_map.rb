@@ -43,6 +43,10 @@ module Minerva
         @field_map ||= generate_field_map
       end
 
+      def extension_fields
+        @extension_fields ||= field_map.select { |_k, v| v.is_extension }.map { |k, v| v }
+      end
+
       def add_query_field(query_field)
         raise 'query_field should have to_sql method' unless query_field.respond_to?(:to_sql)
         minerva_map << query_field
@@ -66,7 +70,7 @@ module Minerva
           FieldTypes::CaseInsensitiveString.new('description', 'resources.description', :description, is_sortable: true, tsv_column: 'tsv_description'),
           FieldTypes::CaseInsensitiveString.new('publisher', 'resources.publisher', :publisher, is_sortable: true),
           FieldTypes::Subject.new('subject', SUBJECT_SELECT, :subject, query_field: 'all_subject_ids', custom_search: true, tsv_column: 'tsv_subjects'),
-          FieldTypes::Efficacy.new('efficacy', 'resources.efficacy', :efficacy,  query_field: 'resources.efficacy', is_sortable: true, field_type: 'int'),
+          FieldTypes::Numeric.new('efficacy', 'resources.efficacy', :efficacy,  query_field: 'resources.efficacy', is_sortable: true, is_extension: true),
           FieldTypes::LearningObjective.new('learningObjectives', TAXONOMIES_SELECT, :learningObjectives, query_field: 'taxonomies.identifier', as_option: :learning_objectives),
           FieldTypes::LearningObjective.new('learningObjectives.targetName', TAXONOMIES_SELECT, :learningObjectives, as_option: :learning_objectives, query_field: 'taxonomies.identifier'),
           FieldTypes::LearningObjective.new('learningObjectives.caseItemGUID', TAXONOMIES_SELECT, :learningObjectives, as_option: :learning_objectives, query_field: 'taxonomies.opensalt_identifier'),
@@ -97,7 +101,7 @@ module Minerva
           FieldTypes::CaseInsensitiveString.new('extensions', 'resources.extensions', :extensions),
           FieldTypes::CaseInsensitiveString.new('relevance', 'resources.relevance', :relevance),
           FieldTypes::NullField.new('ltiLink', 'resources.lti_link', :ltiLink, as_option: :lti_link, search_allowed: false, custom_search: true),
-          FieldTypes::NullField.new('relevance', '1', :relevance, query_field: 'relevance', as_option: :relevance, search_allowed: false, custom_search: true, is_sortable: true),
+          FieldTypes::NullField.new('relevance', '1', :relevance, query_field: 'relevance', as_option: :relevance, search_allowed: false, custom_search: true, is_sortable: true, is_extension: true),
           FieldTypes::CaseInsensitiveString.new('url', 'resources.url', :url, search_allowed: false)
         ] + (Minerva.configuration.extension_fields || [])
       end

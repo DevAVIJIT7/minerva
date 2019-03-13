@@ -22,7 +22,7 @@ module Minerva
     def self.reload_attributes
       Minerva::Search::FieldMap.instance.field_map.each do |_k, v|
         next if v.output_field.blank?
-        attribute v.output_field, if: -> { include_attr?(v) }
+        attribute v.output_field, if: -> { include_attr?(v) && !v.is_extension }
       end
     end
     reload_attributes
@@ -113,7 +113,11 @@ module Minerva
     end
 
     def extensions
-      object.extensions || {}
+      addition = Minerva::Search::FieldMap.instance.extension_fields.inject({}) do |h, i|
+        h[i.output_field] = object.attributes[i.output_field.to_s]
+        h
+      end
+      (object.extensions || {}).merge(addition)
     end
 
     def language

@@ -56,9 +56,7 @@ module Minerva
                              WHERE alignments.resource_id = resources.id),
       resource_stat_ids = (SELECT coalesce(array_agg(resource_stats.id), '{}') FROM resource_stats INNER JOIN alignments ON resource_stats.taxonomy_id = alignments.taxonomy_id WHERE alignments.resource_id = resources.id),
       all_subject_ids = (SELECT coalesce(array_agg(subjects.id), '{}') FROM subjects INNER JOIN resources_subjects ON resources_subjects.subject_id = subjects.id WHERE resources_subjects.resource_id = resources.id),
-      avg_efficacy = (SELECT avg(resource_stats.effectiveness)  FROM resource_stats INNER JOIN alignments ON resource_stats.taxonomy_id = alignments.taxonomy_id WHERE alignments.resource_id = resources.id),
-      efficacy = (SELECT replace(replace(replace(json_agg(CASE WHEN resource_stats.taxonomy_ident IS NOT NULL THEN json_build_object(taxonomies.identifier, resource_stats.effectiveness) ELSE '{}'::json END)::text, '}, {', ', '), ']', ''), '[', '')::jsonb
-                 FROM resource_stats INNER JOIN alignments ON resource_stats.taxonomy_id = alignments.taxonomy_id INNER JOIN taxonomies ON taxonomies.id = alignments.taxonomy_id WHERE alignments.resource_id = resources.id)")
+      efficacy = (SELECT avg(resource_stats.effectiveness)  FROM resource_stats INNER JOIN alignments ON resource_stats.taxonomy_id = alignments.taxonomy_id WHERE alignments.resource_id = resources.id)")
     end
     
     private
