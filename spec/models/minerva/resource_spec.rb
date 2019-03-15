@@ -34,7 +34,8 @@ module Minerva
       expect(r.all_taxonomy_ids).to match_array([t1.id, t2.id, t3.id])
       expect(r.resource_stat_ids).to match_array([stat.id, stat2.id])
       expect(r.all_subject_ids).to match_array([subject.id])
-      expect(r.efficacy).to eq(25)
+      expect(r.avg_efficacy).to eq(25)
+      expect(r.efficacy).to eq({t1.identifier => 20, t2.identifier => 30})
     end
   end
 end

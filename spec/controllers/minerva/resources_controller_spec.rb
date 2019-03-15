@@ -263,7 +263,12 @@ module Minerva
 
           describe 'searching efficacy' do
             before(:each) do
-              resource.update_columns(efficacy: 60)
+              FactoryBot.create(:resource_stat, resource: resource, taxonomy_ident: 'K.CC.1', effectiveness: 2)
+              FactoryBot.create(:resource_stat, resource: resource, taxonomy_ident: 'K.CC.2', effectiveness: 1)
+              stats = Alignments::ResourceStat.where(resource_id: resource.id)
+                          .pluck(:taxonomy_ident, :effectiveness).inject({}) { |h, el| h.merge([el].to_h) }
+              resource.update_columns(resource_stat_ids: Alignments::ResourceStat.where(resource_id: resource.id).pluck(:id),
+                                      efficacy: stats)
             end
 
             it 'returns efficacy' do
@@ -273,25 +278,34 @@ module Minerva
 
               params.merge!(limit: 1, filter: "efficacy!='NULL'")
               action.call
-              expect(json_response['resources'][0]['extensions']['efficacy']).to eq(resource.efficacy)
+              expect(json_response['resources'][0]['extensions']['efficacy']).to match_array(resource.efficacy)
             end
 
             context 'sorts by efficacy' do
-              let!(:resource2) { FactoryBot.create(:video, efficacy: 50) }
+              let(:resource2) { FactoryBot.create(:video) }
+              before do
+                FactoryBot.create(:resource_stat, resource: resource2, taxonomy_ident: 'K.CC.1', effectiveness: 1)
+                FactoryBot.create(:resource_stat, resource: resource2, taxonomy_ident: 'K.CC.2', effectiveness: 2)
+                stats = Alignments::ResourceStat.where(resource_id: resource2.id)
+                            .pluck(:taxonomy_ident, :effectiveness).inject({}) { |h, el| h.merge([el].to_h) }
+                resource2.update_columns(resource_stat_ids: Alignments::ResourceStat.where(resource_id: resource2.id).pluck(:id),
+                                         efficacy: stats)
+              end
 
               it 'sorts asc' do
-                params.merge!(filter: "efficacy!='NULL'", sort: 'efficacy')
+                params.merge!(filter: "efficacy!='NULL'", sort: 'efficacy:K.CC.1')
                 action.call
                 expect(json_response['resources'].map {|x| x['id']}).to eq([resource2.id, resource.id])
               end
 
               it 'sorts desc' do
-                params.merge!(filter: "efficacy!='NULL'", sort: 'efficacy', orderBy: 'desc')
+                params.merge!(filter: "efficacy!='NULL'", sort: 'efficacy:K.CC.1', orderBy: 'desc')
                 action.call
                 expect(json_response['resources'].map {|x| x['id']}).to eq([resource.id, resource2.id])
               end
             end
           end
+
 
           context 'searches by learningObjectives' do
             let!(:s1) do
@@ -852,7 +866,7 @@ module Minerva
               'rating' => '0',
 
               # Non-essential traits
-              'extensions' => {'relevance' => 1, 'efficacy' => 77}
+              'extensions' => {'relevance' => 1, 'avg_efficacy' => 77, 'efficacy'=>{resource_stat.taxonomy.identifier=>77}}
             }
           end
 
@@ -860,11 +874,11 @@ module Minerva
             t = FactoryBot.create(:taxonomy, identifier: 'CCSS.Math.Content.2.G.A.1', min_age: 6, max_age: 7)
             FactoryBot.create(:alignment, resource: resource, taxonomy: t)
             resource.update_columns(min_age: 6, max_age: 7, resource_stat_ids: [resource_stat.id],
-                                    direct_taxonomy_ids: resource.taxonomy_ids, efficacy: 77 )
+                                    direct_taxonomy_ids: resource.taxonomy_ids, efficacy: { resource_stat.taxonomy.identifier => 77 }, avg_efficacy: 77)
             fields = Minerva::Search::FieldMap.instance.field_map.map { |_k, v| v.output_field }.uniq.compact.join(',')
             params.merge!(limit: 1, fields: fields)
             action.call
-            not_standard_fields = %w(relevance efficacy)
+            not_standard_fields = %w(relevance efficacy avg_efficacy)
             expect(json_response['resources'][0].keys).to match_array((fields.split(',') - not_standard_fields) << 'id')
             expect(json_response['resources'][0]).to eq(expected_result)
           end
@@ -947,7 +961,7 @@ module Minerva
             expect(response).to be_successful
             expect(json_response['resources'].count).to eq(1)
             expect(json_response['Severity']).to eq('warning')
-            expect(json_response['Description']).to eq('Use any of search, name, description, publisher, efficacy, learningResourceType, language, rating, publishDate, timeRequired, author, relevance for sorting parameter')
+            expect(json_response['Description']).to eq("Use any of search, name, description, publisher, efficacy, avg_efficacy, learningResourceType, language, rating, publishDate, timeRequired, author, relevance for sorting parameter")
           end
 
           specify 'for wrong orderBy (should be asc/desc)' do

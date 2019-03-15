@@ -87,7 +87,8 @@ class CreateMinervaTables < MIGRATION_CLASS
       t.integer 'resource_stat_ids', default: [], null: false, array: true
       t.integer 'all_subject_ids', default: [], null: false, array: true
       t.tsvector 'tsv_subjects'
-      t.integer 'efficacy'
+      t.integer 'avg_efficacy', default: 0
+      t.jsonb 'efficacy'
       t.integer 'min_age'
       t.integer 'max_age'
       t.integer 'rating'
