@@ -20,14 +20,15 @@ module Minerva
   module FieldTypes
     class Numeric < Base
       def to_sql(clause, _ops = {})
-        unique_field = generate_uniq_field
         query =
           if null_check(clause)
             null_clause(clause)
           else
-            "#{query_field} #{clause.operator} :#{unique_field}"
+            values = clause.value.downcase.split(',').map(&:to_i)
+            raise ArgumentError.new('Multiple values are supported only for = operator') if values.count > 1 && clause.operator!='='
+            "#{query_field} #{values.count > 1 ? 'IN' : clause.operator} (#{values.join(',')})"
           end
-        SqlResult.new(sql: query, sql_params: { unique_field.to_sym => clause.value })
+        SqlResult.new(sql: query)
       end
     end
   end

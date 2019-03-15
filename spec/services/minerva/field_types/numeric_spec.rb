@@ -30,18 +30,21 @@ module Minerva
       context "operator is '<>'" do
         it 'checks not equal' do
           result = target.to_sql(double(value: '123', operator: '<>'))
-          expect(result.sql).to match(/resources.rating <> :resources_rating_\d+/)
-          expect(result.sql_params.keys.count).to eq(1)
-          expect(result.sql_params.values.first).to eq('123')
+          expect(result.sql).to match(/resources.rating <> \(123\)/)
         end
       end
 
       context "operator is '='" do
         it 'checks equality' do
           result = target.to_sql(double(value: '123', operator: '='))
-          expect(result.sql).to match(/resources.rating = :resources_rating_\d+/)
-          expect(result.sql_params.keys.count).to eq(1)
-          expect(result.sql_params.values.first).to eq('123')
+          expect(result.sql).to match(/resources.rating = \(123\)/)
+        end
+      end
+
+      context "multiple values" do
+        it 'checks equality' do
+          result = target.to_sql(double(value: '1,2,3', operator: '='))
+          expect(result.sql).to match(/resources.rating IN \(1,2,3\)/)
         end
       end
 
