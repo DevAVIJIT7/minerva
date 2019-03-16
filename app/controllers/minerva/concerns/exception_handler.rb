@@ -22,6 +22,11 @@ module ExceptionHandler
       render status: :unprocessable_entity, json: ex.record.errors
     end
 
+    rescue_from ActionController::ParameterMissing do |ex|
+      render status: :unprocessable_entity,
+             json: { message: 'ParameterMissing', errors: ex.message }
+    end
+
     rescue_from ArgumentError do |ex|
       render status: :unprocessable_entity,
              json: { message: 'WrongArgument', errors: ex.message }
