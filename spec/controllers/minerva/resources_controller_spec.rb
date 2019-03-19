@@ -864,9 +864,9 @@ module Minerva
               'accessMode' => %w[orientation color textOnImage position visual],
               'publishDate' => resource.publish_date.iso8601,
               'rating' => '0',
-
+              'avg_efficacy' => 77,
               # Non-essential traits
-              'extensions' => {'relevance' => 1, 'avg_efficacy' => 77, 'efficacy'=>{resource_stat.taxonomy.identifier=>77}}
+              'extensions' => {'relevance' => 1, 'efficacy'=>{resource_stat.taxonomy.identifier=>77}}
             }
           end
 
@@ -878,7 +878,7 @@ module Minerva
             fields = Minerva::Search::FieldMap.instance.field_map.map { |_k, v| v.output_field }.uniq.compact.join(',')
             params.merge!(limit: 1, fields: fields)
             action.call
-            not_standard_fields = %w(relevance efficacy avg_efficacy)
+            not_standard_fields = %w(relevance efficacy)
             expect(json_response['resources'][0].keys).to match_array((fields.split(',') - not_standard_fields) << 'id')
             expect(json_response['resources'][0]).to eq(expected_result)
           end
