@@ -3,7 +3,7 @@
 module Minerva
   class Configuration
     attr_accessor :extension_fields, :authorizer, :search_by_taxonomy_aliases,
-                  :filter_sql_proc, :admin_auth_proc, :carrierwave
+                  :filter_sql_proc, :admin_auth_proc, :carrierwave, :after_search_proc
 
     def initialize
       @extension_fields = []
@@ -16,6 +16,7 @@ module Minerva
           controller.render(:json => "Forbidden", :status => 403, :layout => false)
         end
       end
+      @after_search_proc = nil
       @search_by_taxonomy_aliases = true
     end
   end

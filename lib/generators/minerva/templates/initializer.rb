@@ -29,7 +29,9 @@ Minerva.configure do |config|
   config.carrierwave = { storage: :aws, versions: [{ name: :large, size_w_h: [500,500] },
                                                    { name: :medium, size_w_h: [200,200] }] }
   config.search_by_taxonomy_aliases = true
-
+  config.after_search_proc = proc do |controller|
+    #Some logic after searching goes here
+  end
   config.admin_auth_proc = Proc.new do |controller|
     controller.authenticate_or_request_with_http_basic('Minerva') do |username, password|
       controller.render(:json => "Forbidden", :status => 403, :layout => false)

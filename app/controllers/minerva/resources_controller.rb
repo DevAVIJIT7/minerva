@@ -18,6 +18,10 @@ module Minerva
   class ResourcesController < ApplicationController
     include ControllerPagination
 
+    after_action only: :index do
+      Minerva.configuration.after_search_proc.call(self) if Minerva.configuration.after_search_proc
+    end
+
     # GET /2/resources
     def index
       search_result = Search::Engine.new(params, resource_owner_id).perform
