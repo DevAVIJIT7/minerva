@@ -32,6 +32,7 @@ Minerva.configure do |config|
   config.after_search_proc = proc do |controller|
     #Some logic after searching goes here
   end
+  config.hidden_extensions_attrs = %w(source_url embedded_html youtube_id)
   config.admin_auth_proc = Proc.new do |controller|
     controller.authenticate_or_request_with_http_basic('Minerva') do |username, password|
       controller.render(:json => "Forbidden", :status => 403, :layout => false)

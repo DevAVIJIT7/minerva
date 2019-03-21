@@ -3,10 +3,12 @@
 module Minerva
   class Configuration
     attr_accessor :extension_fields, :authorizer, :search_by_taxonomy_aliases,
-                  :filter_sql_proc, :admin_auth_proc, :carrierwave, :after_search_proc
+                  :filter_sql_proc, :admin_auth_proc, :carrierwave, :after_search_proc,
+                  :hidden_extensions_attrs
 
     def initialize
       @extension_fields = []
+      @hidden_extensions_attrs = []
       @authorizer = nil
       @carrierwave = { storage: :aws, versions: [{ name: :large, size_w_h: [500,500] },
                                                  { name: :medium, size_w_h: [200,200] }] }

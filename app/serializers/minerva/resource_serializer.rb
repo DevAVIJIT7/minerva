@@ -117,7 +117,7 @@ module Minerva
         h[i.output_field] = object.attributes[i.output_field.to_s]
         h
       end
-      (object.extensions || {}).merge(addition)
+      (object.extensions || {}).merge(addition).symbolize_keys.except(*Minerva.configuration.hidden_extensions_attrs)
     end
 
     def language
