@@ -52,6 +52,10 @@ module Minerva
                     end
                   end
                   check_standard_ids(clause, ops)
+                elsif filter_field == 'learningObjectives.id'
+                  ids = clause.value.downcase.split(',').map(&:to_i) # just to be sure we have int array
+                  clause.value = ids.join(',')
+                  check_standard_ids(clause, ops)
                 elsif filter_field == 'learningObjectives.targetDescription'
                   if null_check(clause)
                     clause.value = Alignments::Taxonomy.where(null_clause(clause)).pluck(:id).join(',')

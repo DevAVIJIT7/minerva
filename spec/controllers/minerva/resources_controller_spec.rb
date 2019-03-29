@@ -369,6 +369,17 @@ module Minerva
               end
             end
 
+            context 'when filtering using learningObjectives.id' do
+              it 'returns resource' do
+                params.merge!(limit: 1, filter: "learningObjectives.id='#{s1.id}'")
+                action.call
+                expect(json_response['resources'].map { |el| el['name'] })
+                    .to eq([resource.name])
+                expect(json_response['resources'][0]['learningObjectives'].map { |el| el['targetName'] })
+                    .to match_array([s1.identifier, s2.identifier])
+              end
+            end
+
             context 'when filtering using learningObjectives.targetName' do
               context 'when given one targetName' do
                 it 'returns resource' do
