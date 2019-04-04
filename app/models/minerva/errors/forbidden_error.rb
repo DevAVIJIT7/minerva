@@ -15,5 +15,7 @@
 #         limitations under the License.
 
 module Minerva
-  class Errors::ForbiddenError < StandardError; end
+  module Errors
+    class ForbiddenError < StandardError; end
+  end
 end

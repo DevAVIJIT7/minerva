@@ -15,11 +15,13 @@
 #         limitations under the License.
 
 module Minerva
-  class Errors:: LtiSearchError < StandardError
-    attr_accessor :error_data
+  module Errors
+    class LtiSearchError < StandardError
+      attr_accessor :error_data
 
-    def initialize(error_data)
-      self.error_data = error_data
+      def initialize(error_data)
+        self.error_data = error_data
+      end
     end
   end
 end

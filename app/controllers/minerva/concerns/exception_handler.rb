@@ -32,7 +32,7 @@ module ExceptionHandler
              json: { message: 'WrongArgument', errors: ex.message }
     end
 
-    rescue_from Errors::ForbiddenError do |ex|
+    rescue_from Minerva::Errors::ForbiddenError do |ex|
       render status: :forbidden,
              json: { message: 'Forbidden', errors: ex.message }
     end
