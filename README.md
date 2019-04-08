@@ -92,15 +92,6 @@ Note that you cannot use this command in production for safety purposes.
 
 
 ## Extensions
-1. Resource id search. You can use comma delimited resource ids in filter parameter
-if you want to get specific resources:
-```
-curl -X GET \
-  "BASE_URL/ims/rs/v1p0/resources?limit=10&offset=0&filter=id='1,2,3'" \
-  -H "accept: application/json" \
-  -H "authorization: Bearer ACCESS_TOKEN"
-```
-
 
 ## Contributing
 If you want to contribute, you can either make your own extension and then
