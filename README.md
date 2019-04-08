@@ -30,10 +30,10 @@ curl -X POST BASE_URL/oauth/token \
 ```
 
 ### Using Your Access Token
-Once you have received the token, you'll need to provide it in the headers of all other future requests (except for `get_token`). Note that your header needs to have the word "Bearer" in it. Here is a cURL example making a `GET` request to `/2/subjects` (replace `ACCESS_TOKEN` with your actual access token):
+Once you have received the token, you'll need to provide it in the headers of all other future requests (except for `get_token`). Note that your header needs to have the word "Bearer" in it. Here is a cURL example making a `GET` request to `/ims/rs/v1p0/subjects` (replace `ACCESS_TOKEN` with your actual access token):
 
 ```
-curl -X GET BASE_URL/2/subjects \
+curl -X GET BASE_URL/ims/rs/v1p0/subjects \
   -H 'Authorization: Bearer ACCESS_TOKEN'
 ```
 
@@ -41,13 +41,13 @@ curl -X GET BASE_URL/2/subjects \
 These are the existing endpoints:
 
 #### Subjects Controller
-1. `GET /2/subjects` - `index`
+1. `GET /ims/rs/v1p0/subjects` - `index`
 
 #### Resources Controller
-1. `GET /2/resources` - `index`
-2. `POST /2/resources` - `create`
-3. `PUT /2/resources/:id` - `update` (can also use `PATCH`)
-4. `DELETE /2/resources/:id` - `destroy`
+1. `GET /ims/rs/v1p0/resources` - `index`
+2. `POST /ims/rs/v1p0/resources` - `create`
+3. `PUT /ims/rs/v1p0/resources/:id` - `update` (can also use `PATCH`)
+4. `DELETE /ims/rs/v1p0/resources/:id` - `destroy`
 
 Note that all users have access to the `index` actions for both controllers by default. However, for the other endpoints that write changes, `write` scopes are necessary. See above on obtaining access tokens with `write` scopes.
 
@@ -55,7 +55,7 @@ Note that all users have access to the `index` actions for both controllers by d
 An example request you could do (filling in for `BASE_URL` and `TOKEN`) is
 ```
 curl -X GET \
-  "BASE_URL/2/resources?limit=10&offset=0&filter=name~'hello'&sort=name&orderBy=asc" \
+  "BASE_URL/ims/rs/v1p0/resources?limit=10&offset=0&filter=name~'hello'&sort=name&orderBy=asc" \
   -H "accept: application/json" \
   -H "authorization: Bearer ACCESS_TOKEN"
 ```
@@ -92,8 +92,6 @@ Note that you cannot use this command in production for safety purposes.
 
 
 ## Extensions
-
-
 
 ## Contributing
 If you want to contribute, you can either make your own extension and then
