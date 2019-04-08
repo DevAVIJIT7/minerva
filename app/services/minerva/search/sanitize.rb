@@ -61,7 +61,7 @@ module Minerva
       private
 
       def all_sql_fields
-        ['resources.id'] + FieldMap.instance.field_map.values.map(&:select_sql).flatten.compact.uniq
+        ['resources.id, resources.learning_resource_type'] + FieldMap.instance.field_map.values.map(&:select_sql).flatten.compact.uniq
       end
 
       def valid_fields
