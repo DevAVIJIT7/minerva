@@ -25,7 +25,7 @@ module Minerva
         super
 
         self.subkey_type = ops[:subkey_type]
-        self.query_json_inner_field = query_field + "::json->>'#{filter_field}'"
+        self.query_json_inner_field = query_field + "->>'#{filter_field}'"
       end
 
       def to_sql(clause, _ops = {})

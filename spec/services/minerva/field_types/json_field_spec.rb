@@ -18,7 +18,7 @@ require 'rails_helper'
 
 module Minerva
   describe FieldTypes::JSONField do
-    let(:field) { "resources.opened::json->>'featured'" }
+    let(:field) { "resources.opened->>'featured'" }
     let(:target) do
       FieldTypes::JSONField.new('featured', 'resources.opened', :featured)
     end
@@ -30,7 +30,7 @@ module Minerva
         it 'filters directly using the operators' do
           %w[= <> > < >= <=].each do |op|
             result = target.to_sql(double(value: '10', operator: op))
-            expect(result.sql).to match(/resources.opened::json->>'featured' #{op} :resources_opened_\d+/)
+            expect(result.sql).to match(/resources.opened->>'featured' #{op} :resources_opened_\d+/)
             expect(result.sql_params.keys.count).to eq(1)
             expect(result.sql_params.values.first).to eq('10')
           end
