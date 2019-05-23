@@ -130,7 +130,7 @@ module Minerva
 
         input_fields = attrs[:fields].split(',').map(&:to_sym)
         if input_fields.all? { |k| valid_fields.keys.include?(k) }
-          result[:fields] = input_fields.map { |k| valid_fields[k]&.select_sql }.flatten.compact << 'resources.id'
+          result[:fields] = (input_fields.map { |k| valid_fields[k]&.select_sql }.flatten.compact + ['resources.id', 'resources.learning_resource_type']).uniq
           result[:has_fields] = true
         else
           result[:warning] = { Severity: :warning, CodeMinor: :invalid_selection_field,

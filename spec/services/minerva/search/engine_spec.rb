@@ -58,7 +58,7 @@ module Minerva
 
         it 'can select fields' do
           result = Search::Engine.new(fields: 'name,author', filter: "name='video1'").perform.resources
-          expected = { 'id' => r1.id, 'name' => r1.name, 'author' => r1.author }
+          expected = { 'id' => r1.id, 'name' => r1.name, 'author' => r1.author, 'learning_resource_type' => "Media/Video" }
           expect(result[0].attributes).to eq(expected)
         end
 
