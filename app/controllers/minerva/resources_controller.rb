@@ -24,7 +24,7 @@ module Minerva
 
     # GET /2/resources
     def index
-      search_result = Search::Engine.new(params, resource_owner_id).perform
+      search_result = Search::Engine.new(params, resource_owner_id, auth_scope).perform
       set_pagination_headers(search_result.pagination)
       resources = ActiveModel::Serializer::CollectionSerializer.new(search_result.resources, serializer: ResourceSerializer,
                                                                     access_token: access_token, fields: params[:fields].try(:split, ','),
