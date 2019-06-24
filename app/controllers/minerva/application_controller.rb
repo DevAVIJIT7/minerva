@@ -16,7 +16,7 @@
 
 module Minerva
   class ApplicationController < ActionController::API
-    attr_accessor :resource_owner_id
+    attr_accessor :resource_owner_id, :auth_scope
     include ExceptionHandler
 
     before_action :authorize
