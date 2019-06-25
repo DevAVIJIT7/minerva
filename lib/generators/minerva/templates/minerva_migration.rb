@@ -84,7 +84,7 @@ class CreateMinervaTables < MIGRATION_CLASS
       t.date 'publish_date'
       t.integer 'direct_taxonomy_ids', default: [], null: false, array: true
       t.integer 'all_taxonomy_ids', default: [], null: false, array: true
-      t.integer 'resource_stat_ids', default: [], null: false, array: true
+      t.integer 'all_resource_stat_ids', default: [], null: false, array: true
       t.integer 'all_subject_ids', default: [], null: false, array: true
       t.tsvector 'tsv_subjects'
       t.integer 'avg_efficacy', default: 0
@@ -107,7 +107,7 @@ class CreateMinervaTables < MIGRATION_CLASS
       t.index 'technical_format gin_trgm_ops', name: 'index_resources_on_technical_format_trgm', using: :gin
       t.index 'direct_taxonomy_ids gin__int_ops', name: 'index_resources_on_direct_taxonomy_ids', using: :gin
       t.index 'all_taxonomy_ids gin__int_ops', name: 'index_resources_on_all_taxonomy_ids', using: :gin
-      t.index 'resource_stat_ids gin__int_ops', name: 'index_resources_on_resource_stat_ids', using: :gin
+      t.index 'all_resource_stat_ids gin__int_ops', name: 'index_resources_on_all_resource_stat_ids', using: :gin
       t.index 'use_rights_url gin_trgm_ops', name: 'index_resources_on_use_rights_url_trgm', using: :gin
       t.index ['min_age'], name: 'index_resources_min_age'
       t.index ['max_age'], name: 'index_resources_max_age'
