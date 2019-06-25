@@ -44,6 +44,10 @@ module Minerva
         self.params = params
       end
 
+      def fetch_resources(ids)
+        Resource.select("#{fields.join(',')}").where(id: ids)
+      end
+
       def perform
         tf = transform(filter, expand_objectives: params.fetch('extensions.expandObjectives', false))
 
