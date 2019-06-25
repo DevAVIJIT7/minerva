@@ -75,7 +75,7 @@ module Minerva
 
       %i[educational_audience accessibility_api accessibility_input_methods accessibility_hazards access_mode].each do |v|
         val = send(v)
-        if val && (!val.is_a?(Array) || val.detect { |s| !(Resource.const_get(v.to_s.upcase).include? s) })
+        if val.present? && (!val.is_a?(Array) || val.detect { |s| !(Resource.const_get(v.to_s.upcase).include? s) })
           errors.add(v, "should contain #{Resource.const_get(v.to_s.upcase)} elements")
         end
       end
