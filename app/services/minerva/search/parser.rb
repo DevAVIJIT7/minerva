@@ -19,7 +19,7 @@ module Minerva
     class Parser < Parslet::Parser
       rule(:operator) { (str('>=') | str('<=') | str('!=') | str('=') | str('>') | str('<') | str('~')).as(:operator) }
       rule(:cond_operator) { (str('AND') | str('OR') | str('&&') | str('||')).as(:cond_operator) }
-      rule(:term) { match("[\-a-zA-Z0-9\_\.\s\,\/\:&]").repeat(1).as(:term) }
+      rule(:term) { match("[\-a-zA-Z0-9\_\s\.\,\/\:&(){}]").repeat(1).as(:term) }
       rule(:quote) { str("'") | str('"') }
       rule(:lparen) { str('(') }
       rule(:rparen) { str(')') }

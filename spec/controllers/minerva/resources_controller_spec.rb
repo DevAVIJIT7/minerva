@@ -172,6 +172,13 @@ module Minerva
               expect(json_response['resources'].count).to eq(1)
             end
 
+            specify "= operator, miltiple words name with braces" do
+              resource.update(name: 'Tessera Middle School(UAT)')
+              params.merge!(limit: 1, filter: "search='Tessera Middle School(UAT)'")
+              action.call
+              expect(json_response['resources'].count).to eq(1)
+            end
+
             context "subject search" do
               specify "= operator, searching by subject" do
                 resource.update(all_subject_ids: [FactoryBot.create(:subject, resources: [resource], name: 'Math').id])
