@@ -19,7 +19,7 @@ module Minerva
     def index
       # TODO: Add pagination
       subjects = Subject.all
-      render json: subjects, root: :subjects, adapter: :json, each_serializer: SubjectSerializer
+      render json: subjects, root: 'subjects', adapter: :json, each_serializer: SubjectSerializer
     end
   end
 end

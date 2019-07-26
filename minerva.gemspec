@@ -26,7 +26,7 @@ Gem::Specification.new do |s|
   s.add_dependency 'pg', '~> 0.21'
   s.add_dependency 'rails', '~> 5.2.2.1'
   s.add_dependency 'virtus'
-  s.add_dependency 'mini_magick'
+  s.add_dependency 'mini_magick', '>= 4.9.4'
   s.add_dependency 'carrierwave-aws'
   s.add_dependency 'carrierwave', '~> 1.2.3'
   s.add_dependency 'swagger_ui_engine'
