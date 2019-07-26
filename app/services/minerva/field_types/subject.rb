@@ -24,11 +24,12 @@ module Minerva
           if null_check(clause)
             null_clause(clause)
           else
-            ids = if clause.operator == 'ILIKE'
-              Minerva::Subject.where("name::text ILIKE ?", clause.value).pluck(:id).join(',')
+            subjects = if clause.operator == 'ILIKE'
+              Minerva::Subject.where("name::text ILIKE ?", clause.value)
             else
-              Minerva::Subject.where(name: clause.value).pluck(:id).join(',')
+              Minerva::Subject.where(name: clause.value)
             end
+            ids = subjects.flat_map { |s| s.subtree_ids }.uniq.join(',')
             ids.present? ? "(all_subject_ids && ARRAY[#{ids}])" : "1=0"
           end
         SqlResult.new(sql: query, tsv_column: tsv_column, value: clause.value)
