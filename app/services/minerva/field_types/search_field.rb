@@ -27,8 +27,10 @@ module Minerva
         query = if null_check(clause)
                    null_clause(clause)
                 else
+                  has_lexemes = ActiveRecord::Base.connection.execute("SELECT numnode(plainto_tsquery(#{ActiveRecord::Base.connection.quote(val)})) <> 0 result").to_a.first['result']
+                  fts = has_lexemes ? "resources.tsv_text @@ plainto_tsquery(:#{unique_field}) OR" : "";
                   sql_params = { unique_field.to_sym => val }
-                  "#{clause.operator == '<>' ? 'NOT ' : ''}(resources.tsv_text @@ plainto_tsquery(:#{unique_field}) OR resources.name % (:#{unique_field}))"
+                  "#{clause.operator == '<>' ? 'NOT ' : ''}(#{fts} resources.name % (:#{unique_field}))"
                 end
 
         SqlResult.new(sql: query, sql_params: sql_params, tsv_column: tsv_column, value: val)
