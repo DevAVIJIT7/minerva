@@ -51,6 +51,14 @@ module Minerva
           expect(Search::Engine.new(sort: 'name', orderBy: 'desc').perform.resources.map(&:id)).to eq([r4, r3, r2, r1].map(&:id))
         end
 
+        it 'sorts by custom sql first' do
+          Minerva.configuration.order_first_sql_proc = Proc.new do |user_id|
+            "is_searchable desc"
+          end
+          r1.update(is_searchable: false)
+          expect(Search::Engine.new(sort: 'name', orderBy: 'asc').perform.resources.map(&:id)).to eq([r2, r3, r4, r1].map(&:id))
+        end
+
         it 'can paginate' do
           expect(Search::Engine.new(limit: 2).perform.resources.map(&:id)).to eq([r1, r2].map(&:id))
           expect(Search::Engine.new(limit: 2, offset: 2).perform.resources.map(&:id)).to eq([r3, r4].map(&:id))

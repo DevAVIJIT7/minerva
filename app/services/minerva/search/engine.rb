@@ -90,9 +90,12 @@ module Minerva
       private
 
       def sort_resources(resources, tf)
+        first_order_sql = ''
+        first_order_sql = Minerva.configuration.order_first_sql_proc.call(resource_owner_id) if Minerva.configuration.order_first_sql_proc
+        first_order_sql += ', ' if first_order_sql.present?
         if sort[:json_key]
           raise ArgumentError.new("Unspecified field type for json sorting") if sort[:sort_field].field_type.blank?
-          resources = resources.order(Arel.sql("(#{sort[:sort_field].query_field}->>'#{sort[:json_key]}')::#{sort[:sort_field].field_type} #{order_by} NULLS LAST"))
+          resources = resources.order(Arel.sql("#{first_order_sql} (#{sort[:sort_field].query_field}->>'#{sort[:json_key]}')::#{sort[:sort_field].field_type} #{order_by} NULLS LAST"))
         else
           tsv_columns = tf[:filter_items]&.select(&:tsv_column)&.map(&:tsv_column)&.join(' || ')
           tsv_vals = tf[:filter_items]&.select(&:tsv_column)&.map(&:value)&.join(' ')
@@ -103,7 +106,7 @@ module Minerva
             end
             sort_by_id = ", id desc"
           end
-          resources = resources.order(Arel.sql("#{sort_sql} #{order_by} NULLS LAST#{sort_by_id}"))
+          resources = resources.order(Arel.sql("#{first_order_sql} #{sort_sql} #{order_by} NULLS LAST#{sort_by_id}"))
         end
         resources
       end
