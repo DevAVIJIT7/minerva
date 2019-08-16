@@ -70,7 +70,12 @@ module Minerva
         global_filter = Minerva.configuration.filter_sql_proc.call(resource_owner_id, auth_scope) if Minerva.configuration.filter_sql_proc
         resources = resources.where(global_filter) if global_filter
         cnt_query = Resource.where(tf[:where])
-        total_count = (global_filter ? cnt_query.where(global_filter) : cnt_query).count
+
+        if Minerva.configuration.count_resources_proc
+          total_count = Minerva.configuration.count_resources_proc.call(cnt_query, resource_owner_id, auth_scope)
+        else
+          total_count = (global_filter ? cnt_query.where(global_filter) : cnt_query).count
+        end
 
         result = PaginationService.new(resources, total_count).page(limit, offset)
         result.warning = warning
