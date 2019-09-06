@@ -50,11 +50,11 @@ module Minerva
       Minerva::Resource.where(id: ids).update_all("
       direct_taxonomy_ids = (SELECT coalesce(array_agg(taxonomies.id), '{}') FROM taxonomies
                              INNER JOIN alignments ON taxonomies.id = alignments.taxonomy_id
-                             WHERE alignments.resource_id = resources.id),
+                             WHERE alignments.resource_id = resources.id AND alignments.status = #{Minerva::Alignments::Alignment::STATUS_CURATOR_CONFIRMED}),
       all_taxonomy_ids = (SELECT coalesce(uniq(sort(array_remove(array_agg(taxonomies.id::int) || array_agg(taxonomy_mappings.taxonomy_id::int) || array_agg(taxonomy_mappings.target_id::int), NULL))), '{}')  FROM taxonomies
                              INNER JOIN alignments ON taxonomies.id = alignments.taxonomy_id
                              LEFT JOIN taxonomy_mappings ON taxonomies.id IN (taxonomy_mappings.taxonomy_id, taxonomy_mappings.target_id)
-                             WHERE alignments.resource_id = resources.id),
+                             WHERE alignments.resource_id = resources.id AND alignments.status = #{Minerva::Alignments::Alignment::STATUS_CURATOR_CONFIRMED}),
       all_resource_stat_ids = (SELECT coalesce(array_agg(resource_stats.id), '{}') FROM resource_stats INNER JOIN alignments ON resource_stats.taxonomy_id = alignments.taxonomy_id WHERE alignments.resource_id = resources.id),
       all_subject_ids = (SELECT coalesce(array_agg(subjects.id), '{}') FROM subjects INNER JOIN resources_subjects ON resources_subjects.subject_id = subjects.id WHERE resources_subjects.resource_id = resources.id),
       avg_efficacy = (SELECT avg(resource_stats.effectiveness)  FROM resource_stats INNER JOIN alignments ON resource_stats.taxonomy_id = alignments.taxonomy_id WHERE alignments.resource_id = resources.id),
