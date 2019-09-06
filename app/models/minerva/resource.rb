@@ -51,6 +51,9 @@ module Minerva
       direct_taxonomy_ids = (SELECT coalesce(array_agg(taxonomies.id), '{}') FROM taxonomies
                              INNER JOIN alignments ON taxonomies.id = alignments.taxonomy_id
                              WHERE alignments.resource_id = resources.id AND alignments.status = #{Minerva::Alignments::Alignment::STATUS_CURATOR_CONFIRMED}),
+      rejected_taxonomy_ids = (SELECT coalesce(array_agg(taxonomies.id), '{}') FROM taxonomies
+                             INNER JOIN alignments ON taxonomies.id = alignments.taxonomy_id
+                             WHERE alignments.resource_id = resources.id AND alignments.status = #{Minerva::Alignments::Alignment::STATUS_CURATOR_BAD}),
       all_taxonomy_ids = (SELECT coalesce(uniq(sort(array_remove(array_agg(taxonomies.id::int) || array_agg(taxonomy_mappings.taxonomy_id::int) || array_agg(taxonomy_mappings.target_id::int), NULL))), '{}')  FROM taxonomies
                              INNER JOIN alignments ON taxonomies.id = alignments.taxonomy_id
                              LEFT JOIN taxonomy_mappings ON taxonomies.id IN (taxonomy_mappings.taxonomy_id, taxonomy_mappings.target_id)
@@ -62,12 +65,12 @@ module Minerva
                  FROM resource_stats INNER JOIN alignments ON resource_stats.taxonomy_id = alignments.taxonomy_id INNER JOIN taxonomies ON taxonomies.id = alignments.taxonomy_id WHERE alignments.resource_id = resources.id)")
     end
 
-    private
-
     def update_denormalized_fields
       self.class.update_denormalized_data([self.id])
     end
 
+    private
+    
     def validate_model
       if text_complexity && (!text_complexity.is_a?(Hash) || (text_complexity.keys.map(&:to_s) - TEXT_COMPLEXITY).present?)
         errors.add(:text_complexity, "should contain #{TEXT_COMPLEXITY} keys")
