@@ -23,7 +23,7 @@ module Minerva
       attr_accessor :minerva_map
 
       TAXONOMIES_SELECT = "(select json_agg(json_build_object('id', taxonomies.id, 'opensalt_identifier', COALESCE(taxonomies.opensalt_identifier, ''), 'description', COALESCE(taxonomies.description, ''), 'alignment_type', COALESCE(taxonomies.alignment_type, ''), 'source', COALESCE(taxonomies.source, ''), 'identifier', COALESCE(taxonomies.identifier, ''))) FROM taxonomies WHERE id = ANY(resources.direct_taxonomy_ids))"
-      TEXT_COMPLEXITY_SELECT = "jsonb_build_array(json_build_object('name', 'Flesch-Kincaid', 'value', resources.text_complexity->>'flesch_kincaid'), json_build_object('name', 'Lexile', 'value', resources.text_complexity->>'lexile'))"
+      TEXT_COMPLEXITY_SELECT = "jsonb_build_array(json_build_object('name', 'Flesch-Kincaid', 'value', resources.text_complexity->>'flesch-kincaid'), json_build_object('name', 'Lexile', 'value', resources.text_complexity->>'lexile'))"
       SUBJECT_SELECT = '(select array_agg(subjects.name) from subjects WHERE id = ANY(resources.all_subject_ids))'
       AGE_RANGE_SELECT = "(SELECT CASE WHEN resources.min_age IS NULL THEN resources.max_age::text
                                       WHEN resources.max_age IS NULL THEN resources.min_age::text
