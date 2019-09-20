@@ -60,6 +60,7 @@ ActiveRecord::Schema.define(version: 20_180_823_080_025) do
     t.text 'thumbnail_url'
     t.jsonb 'text_complexity', default: {}
     t.citext 'author'
+    t.boolean "is_searchable", default: true
     t.citext 'publisher', null: false
     t.citext 'use_rights_url'
     t.bigint 'time_required'
@@ -76,6 +77,7 @@ ActiveRecord::Schema.define(version: 20_180_823_080_025) do
     t.integer 'all_taxonomy_ids', default: [], null: false, array: true
     t.integer 'all_resource_stat_ids', default: [], null: false, array: true
     t.integer 'all_subject_ids', default: [], null: false, array: true
+    t.integer 'rejected_taxonomy_ids', default: [], null: false, array: true
     t.tsvector 'tsv_subjects'
     t.integer 'avg_efficacy', default: 0
     t.jsonb 'efficacy'
