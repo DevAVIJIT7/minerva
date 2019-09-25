@@ -351,6 +351,21 @@ module Minerva
               end
             end
 
+            context 'search by child ids' do
+              it 'returns empty set' do
+                root = FactoryBot.create(:taxonomy, identifier: 'CCSS.Math.Content.2.G')
+                parent = FactoryBot.create(:taxonomy, identifier: 'CCSS.Math.Content.2.G.A', parent: root)
+                s1.update(parent: parent)
+                s2.update(parent: parent)
+                params.merge!(limit: 1, filter: "learningObjectives.targetName='CCSS.Math.Content.2.G'")
+                action.call
+                expect(json_response['resources'].count).to eq(1)
+                params.merge!(limit: 1, filter: "learningObjectives.targetName='CCSS.Math.Content.2.G.A'")
+                action.call
+                expect(json_response['resources'].count).to eq(1)
+              end
+            end
+
             context 'returns empty set for not present field in db' do
               it 'returns empty set' do
                 params.merge!(limit: 1, filter: "learningObjectives.educationalFramework!='NULL'")

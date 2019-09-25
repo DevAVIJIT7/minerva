@@ -1,19 +1,27 @@
 
 # frozen_string_literal: true
 
-# NOTE: Define :target, :field, :exists_sql, :taxonomy_pluck
+# NOTE: Define :target, :field
 shared_examples 'learning_objectives_null_check' do
   context 'null check' do
     it 'filters on field IS NULL' do
-      expect(Minerva::Alignments::Taxonomy).to receive(:where).with("#{field} IS NULL").and_return([])
       result = target.to_sql(OpenStruct.new(value: 'NULL', operator: '='))
-      expect(result.sql).to eq('1=0')
+      ids = Minerva::Alignments::Taxonomy.where(field => nil).pluck(:id).join(',')
+      if ids.present?
+        expect(result.sql).to eq("(resources.direct_taxonomy_ids && ARRAY[#{ids}])")
+      else
+        expect(result.sql).to eq("1=0")
+      end
     end
 
     it 'filters on field IS NOT NULL' do
-      expect(Minerva::Alignments::Taxonomy).to receive(:where).with("#{field} IS NOT NULL").and_return(taxonomy_pluck)
       result = target.to_sql(OpenStruct.new(value: 'NULL', operator: '<>'))
-      expect(result.sql).to eq(exists_sql)
+      ids = Minerva::Alignments::Taxonomy.where.not(field => nil).pluck(:id).join(',')
+      if ids.present?
+        expect(result.sql).to eq("(resources.direct_taxonomy_ids && ARRAY[#{ids}])")
+      else
+        expect(result.sql).to eq("1=0")
+      end
     end
   end
 end
@@ -24,10 +32,8 @@ shared_examples 'learning_objectives_expand_objectives' do
   context 'expand_objectives = true' do
     context "operator is '='" do
       it 'returns sql' do
-        new_value = defined?(value2) ? value2 : value
-        expect(Minerva::Alignments::Taxonomy).to receive(:where).with(where_clause, value).and_return(taxonomy_pluck)
-        result = target.to_sql(OpenStruct.new(value: new_value, operator: '='), expand_objectives: 'true')
-        expect(result.sql).to eq('(resources.all_taxonomy_ids && ARRAY[1,2,3])')
+        result = target.to_sql(OpenStruct.new(value: value, operator: '='), expand_objectives: 'true')
+        expect(result.sql).to start_with('(resources.all_taxonomy_ids && ARRAY[')
         expect(result.sql_params.keys.count).to eq(0)
       end
     end
