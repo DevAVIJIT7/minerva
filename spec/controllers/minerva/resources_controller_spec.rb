@@ -127,13 +127,6 @@ module Minerva
                   .to eq(['test'])
             end
 
-            it 'tests similarity' do
-              params.merge!(limit: 1, filter: "name~'TeS'")
-              action.call
-              expect(json_response['resources'].map { |el| el['name'] })
-                  .to eq(['test'])
-            end
-
             specify 'name = NULL' do
               params.merge!(limit: 1, filter: "name='NULL'")
               action.call
@@ -156,12 +149,6 @@ module Minerva
           describe 'filtering by "search"' do
             specify "~ operator" do
               params.merge!(limit: 1, filter: "search~'test'")
-              action.call
-              expect(json_response['resources'].count).to eq(1)
-            end
-
-            specify "fuzzy search" do
-              params.merge!(limit: 1, filter: "search~'tesp'")
               action.call
               expect(json_response['resources'].count).to eq(1)
             end
