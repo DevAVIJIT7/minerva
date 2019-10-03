@@ -81,7 +81,7 @@ module Minerva
           FieldTypes::LearningObjective.new('learningObjectives.targetURL', TAXONOMIES_SELECT, :learningObjectives, as_option: :learning_objectives, custom_search: true),
           FieldTypes::LearningObjective.new('learningObjectives.educationalFramework', TAXONOMIES_SELECT, :learningObjectives, as_option: :learning_objectives, custom_search: true),
           FieldTypes::LearningObjective.new('learningObjectives.caseItemUri', TAXONOMIES_SELECT, :learningObjectives, as_option: :learning_objectives, query_field: 'taxonomies.source'),
-          FieldTypes::CaseInsensitiveString.new('learningResourceType', 'resources.learning_resource_type', :learningResourceType, as_option: :learning_resource_type, is_sortable: true),
+          FieldTypes::LearningResourceTypeField.new('learningResourceType', 'resources.learning_resource_type', :learningResourceType, as_option: :learning_resource_type, is_sortable: true),
           FieldTypes::CaseInsensitiveString.new('language', 'resources.language', :language, is_sortable: true),
           FieldTypes::TypicalAgeRange.new('typicalAgeRange', AGE_RANGE_SELECT, :typicalAgeRange, as_option: :typical_age_range, custom_search: true),
           FieldTypes::CaseInsensitiveString.new('rating', 'resources.rating', :rating, is_sortable: true),

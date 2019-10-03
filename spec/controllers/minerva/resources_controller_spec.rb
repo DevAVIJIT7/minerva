@@ -671,6 +671,21 @@ module Minerva
               action.call
               expect(json_response['resources'].count).to eq(1)
             end
+
+            it 'returns resources for comma separated learningResourceType list' do
+              FactoryBot.create(:video)
+              params.merge!(filter: "learningResourceType='Game,Media/Video'")
+              action.call
+              expect(json_response['resources'].count).to eq(2)
+            end
+
+            specify '<> operator' do
+              res = FactoryBot.create(:video)
+              params.merge!(filter: "learningResourceType!='Game'")
+              action.call
+              expect(json_response['resources'].count).to eq(1)
+              expect(json_response['resources'][0]['id']).to eq(res.id)
+            end
           end
 
           context 'searches by timeRequired' do
