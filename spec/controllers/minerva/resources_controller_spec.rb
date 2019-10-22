@@ -871,6 +871,13 @@ module Minerva
           expect(response.headers['X-Total-Count']).to eq(1)
         end
 
+        it 'ignores empty values' do
+          params.merge!(filter: "search=''")
+          action.call
+          expect(response).to be_successful
+          expect(json_response['resources'].count).to eq(0)
+        end
+
         context 'when searching for all fields' do
           let(:expected_result) do
             {
