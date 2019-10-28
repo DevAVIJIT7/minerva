@@ -27,13 +27,12 @@ module Minerva
       RELEVANCE = 'relevance'
 
       MAX_LIMIT      = 100
-      MAX_OFFSET     = 100_000
 
       def initialize(params, resource_owner_id = nil, auth_scope = nil)
         sanitizer     = Sanitize.new(fields: params.fetch(:fields, nil), sort: params.fetch(:sort, 'name'), order_by: params.fetch(:orderBy, :asc))
         self.filter   = params.fetch(:filter, '')
         self.limit    = check_value(params[:limit].to_i, DEFAULT_LIMIT, MAX_LIMIT)
-        self.offset   = check_value(params[:offset].to_i, DEFAULT_OFFSET, MAX_OFFSET)
+        self.offset   = params.fetch(:offset, '0').to_i
         self.fields   = sanitizer.fields
         self.sort     = sanitizer.sort
         self.warning  = sanitizer.warning
