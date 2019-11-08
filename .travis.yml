@@ -1,26 +1,18 @@
 language: ruby
-rvm: 2.6.1
-dist: trusty
+rvm: 2.6.5
+dist: bionic
 cache: bundler
-sudo: required
-services:
-  - postgresql
-addons:
-  postgresql: "9.6"
-before_script: |
-  #!/usr/bin/env bash
-  set -ex
-
-  echo "Installing Postgres 10"
-  sudo service postgresql stop
-  sudo apt-get remove -q 'postgresql-*'
-  sudo apt-get update -q
-  sudo apt-get install -q postgresql-10 postgresql-client-10
-  sudo cp /etc/postgresql/{9.6,10}/main/pg_hba.conf
-
-  echo "Restarting Postgres 10"
-  sudo service postgresql restart
+before_install:
+  - sudo apt-get update
+  - sudo apt-get --yes remove postgresql\*
+  - sudo apt-get install -y postgresql-11 postgresql-client-11
+  - sudo cp /etc/postgresql/{9.6,11}/main/pg_hba.conf
+  - sudo service postgresql restart 11  
+before_script:
+  - psql --version
+  - psql -c 'CREATE ROLE travis SUPERUSER LOGIN CREATEDB;' -U postgres
 services:
   - redis-server
+  - postgresql
 script:
   - PGPASSWORD="" PGUSERNAME=postgres ./bin/ci
