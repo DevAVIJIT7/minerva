@@ -24,7 +24,7 @@ Gem::Specification.new do |s|
   s.add_dependency 'kaminari'
   s.add_dependency 'parslet'
   s.add_dependency 'pg', '~> 1.1.4'
-  s.add_dependency 'rails', '~> 5.2.2'
+  s.add_dependency 'rails', '~> 5.2.2.1'
   s.add_dependency 'virtus'
   s.add_dependency 'mini_magick', '>= 4.9.4'
   s.add_dependency 'carrierwave-aws'
