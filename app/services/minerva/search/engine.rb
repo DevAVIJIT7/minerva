@@ -55,7 +55,7 @@ module Minerva
             tsv_columns = tf[:filter_items]&.select(&:tsv_column)&.map(&:tsv_column)&.join(' || ')
             tsv_vals = tf[:filter_items]&.select(&:tsv_column)&.map(&:value)&.join(' ')
             if tsv_columns.present? && tsv_vals.present?
-              fields[i] = Arel.sql("LEAST(1, ts_rank_cd(#{tsv_columns}, plainto_tsquery(#{ActiveRecord::Base.connection.quote(tsv_vals)}))) AS #{RELEVANCE}")
+              fields[i] = Arel.sql("LEAST(1, ts_rank_cd(#{tsv_columns}, plainto_tsquery('english', #{ActiveRecord::Base.connection.quote(tsv_vals)}))) AS #{RELEVANCE}")
             end
           end
         end
@@ -101,7 +101,7 @@ module Minerva
           sort_sql = sort[:sort_field].query_field
           if sort[:sort_field].query_field == RELEVANCE
             if tsv_columns.present? && tsv_vals.present?
-              sort_sql = "ts_rank_cd(#{tsv_columns}, plainto_tsquery(#{ActiveRecord::Base.connection.quote(tsv_vals)}))"
+              sort_sql = "ts_rank_cd(#{tsv_columns}, plainto_tsquery('english', #{ActiveRecord::Base.connection.quote(tsv_vals)}))"
             end
             sort_by_id = ", id desc"
           end
