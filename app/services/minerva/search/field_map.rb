@@ -24,7 +24,6 @@ module Minerva
 
       TAXONOMIES_SELECT = "(select json_agg(json_build_object('id', taxonomies.id, 'opensalt_identifier', COALESCE(taxonomies.opensalt_identifier, ''), 'description', COALESCE(taxonomies.description, ''), 'alignment_type', COALESCE(taxonomies.alignment_type, ''), 'source', COALESCE(taxonomies.source, ''), 'identifier', COALESCE(taxonomies.identifier, ''))) FROM taxonomies WHERE id = ANY(resources.direct_taxonomy_ids))"
       TEXT_COMPLEXITY_SELECT = "jsonb_build_array(json_build_object('name', 'Flesch-Kincaid', 'value', resources.text_complexity->>'flesch-kincaid'), json_build_object('name', 'Lexile', 'value', resources.text_complexity->>'lexile'))"
-      SUBJECT_SELECT = '(select array_agg(subjects.name) from subjects WHERE id = ANY(resources.all_subject_ids))'
       AGE_RANGE_SELECT = "(SELECT CASE WHEN resources.min_age IS NULL THEN resources.max_age::text
                                       WHEN resources.max_age IS NULL THEN resources.min_age::text
                                       WHEN resources.max_age IS NOT NULL AND resources.max_age = resources.min_age THEN resources.min_age::text
@@ -69,7 +68,7 @@ module Minerva
           FieldTypes::CaseInsensitiveString.new('name', 'resources.name', :name, is_sortable: true, tsv_column: 'tsv_name'),
           FieldTypes::CaseInsensitiveString.new('description', 'resources.description', :description, is_sortable: true, tsv_column: 'tsv_description'),
           FieldTypes::CaseInsensitiveString.new('publisher', 'resources.publisher', :publisher, is_sortable: true),
-          FieldTypes::Subject.new('subject', SUBJECT_SELECT, :subject, query_field: 'all_subject_ids', custom_search: true, tsv_column: 'tsv_subjects'),
+          FieldTypes::Subject.new('subject', Minerva.configuration.subjects_select_sql, :subject, query_field: 'all_subject_ids', custom_search: true, tsv_column: 'tsv_subjects'),
           FieldTypes::Efficacy.new('efficacy', 'resources.efficacy', :efficacy,  query_field: 'resources.efficacy', is_sortable: true, field_type: 'int', is_extension: true),
           FieldTypes::Numeric.new('avg_efficacy', 'resources.avg_efficacy', :avg_efficacy,  query_field: 'resources.avg_efficacy', is_sortable: true),
           FieldTypes::LearningObjective.new('learningObjectives', TAXONOMIES_SELECT, :learningObjectives, query_field: 'taxonomies.identifier', as_option: :learning_objectives),
