@@ -19,7 +19,8 @@ module Minerva
   module Search
     class Engine
       attr_accessor :search, :filter, :limit, :offset, :fields, :sort,
-                    :order_by, :has_fields, :warning, :params, :resource_owner_id, :auth_scope
+                    :order_by, :has_fields, :warning, :params, :resource_owner_id,
+                    :auth_scope, :jwt_info
 
       DEFAULT_LIMIT  = 100
       DEFAULT_OFFSET = 0
@@ -28,13 +29,14 @@ module Minerva
 
       MAX_LIMIT      = 100
 
-      def initialize(params, resource_owner_id = nil, auth_scope = nil)
+      def initialize(params, resource_owner_id = nil, auth_scope = nil, jwt_info = nil)
         sanitizer     = Sanitize.new(fields: params.fetch(:fields, nil), sort: params.fetch(:sort, 'name'), order_by: params.fetch(:orderBy, :asc))
         self.filter   = params.fetch(:filter, '')
         self.limit    = check_value(params[:limit].to_i, DEFAULT_LIMIT, MAX_LIMIT)
         self.offset   = params.fetch(:offset, '0').to_i
         self.fields   = sanitizer.fields
         self.sort     = sanitizer.sort
+        self.jwt_info = jwt_info
         self.warning  = sanitizer.warning
         self.order_by = sanitizer.order_by if sort.present?
         self.has_fields = sanitizer.has_fields
@@ -46,6 +48,7 @@ module Minerva
       def fetch_resources(ids)
         Resource.select("#{fields.join(',')}").where(id: ids)
       end
+
 
       def perform
         tf = transform(filter, expand_objectives: params.fetch('extensions.expandObjectives', false))
@@ -66,7 +69,7 @@ module Minerva
 
         resources = Resource.select("#{fields}").where(tf[:where])
         resources = sort_resources(resources, tf)
-        global_filter = Minerva.configuration.filter_sql_proc.call(resource_owner_id, auth_scope) if Minerva.configuration.filter_sql_proc
+        global_filter = Minerva.configuration.filter_sql_proc.call(resource_owner_id, auth_scope, jwt_info) if Minerva.configuration.filter_sql_proc
         resources = resources.where(global_filter) if global_filter
         cnt_query = Resource.where(tf[:where])
 
