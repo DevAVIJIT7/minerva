@@ -22,7 +22,6 @@ module Minerva
 
       attr_accessor :minerva_map
 
-      TAXONOMIES_SELECT = "(select json_agg(json_build_object('id', taxonomies.id, 'opensalt_identifier', COALESCE(taxonomies.opensalt_identifier, ''), 'description', COALESCE(taxonomies.description, ''), 'alignment_type', COALESCE(taxonomies.alignment_type, ''), 'source', COALESCE(taxonomies.source, ''), 'identifier', COALESCE(taxonomies.identifier, ''))) FROM taxonomies WHERE id = ANY(resources.direct_taxonomy_ids))"
       TEXT_COMPLEXITY_SELECT = "jsonb_build_array(json_build_object('name', 'Flesch-Kincaid', 'value', resources.text_complexity->>'flesch-kincaid'), json_build_object('name', 'Lexile', 'value', resources.text_complexity->>'lexile'))"
       AGE_RANGE_SELECT = "(SELECT CASE WHEN resources.min_age IS NULL THEN resources.max_age::text
                                       WHEN resources.max_age IS NULL THEN resources.min_age::text
@@ -71,15 +70,15 @@ module Minerva
           FieldTypes::Subject.new('subject', Minerva.configuration.subjects_select_sql, :subject, query_field: 'all_subject_ids', custom_search: true, tsv_column: 'tsv_subjects'),
           FieldTypes::Efficacy.new('efficacy', 'resources.efficacy', :efficacy,  query_field: 'resources.efficacy', is_sortable: true, field_type: 'int', is_extension: true),
           FieldTypes::Numeric.new('avg_efficacy', 'resources.avg_efficacy', :avg_efficacy,  query_field: 'resources.avg_efficacy', is_sortable: true),
-          FieldTypes::LearningObjective.new('learningObjectives', TAXONOMIES_SELECT, :learningObjectives, query_field: 'taxonomies.identifier', as_option: :learning_objectives),
-          FieldTypes::LearningObjective.new('learningObjectives.id', TAXONOMIES_SELECT, :learningObjectives, as_option: :learning_objectives, query_field: 'taxonomies.id'),
-          FieldTypes::LearningObjective.new('learningObjectives.targetName', TAXONOMIES_SELECT, :learningObjectives, as_option: :learning_objectives, query_field: 'taxonomies.identifier'),
-          FieldTypes::LearningObjective.new('learningObjectives.caseItemGUID', TAXONOMIES_SELECT, :learningObjectives, as_option: :learning_objectives, query_field: 'taxonomies.opensalt_identifier'),
-          FieldTypes::LearningObjective.new('learningObjectives.alignmentType', TAXONOMIES_SELECT, :learningObjectives, as_option: :learning_objectives, query_field: 'taxonomies.alignment_type'),
-          FieldTypes::LearningObjective.new('learningObjectives.targetDescription', TAXONOMIES_SELECT, :learningObjectives, as_option: :learning_objectives, query_field: 'taxonomies.description'),
-          FieldTypes::LearningObjective.new('learningObjectives.targetURL', TAXONOMIES_SELECT, :learningObjectives, as_option: :learning_objectives, custom_search: true),
-          FieldTypes::LearningObjective.new('learningObjectives.educationalFramework', TAXONOMIES_SELECT, :learningObjectives, as_option: :learning_objectives, custom_search: true),
-          FieldTypes::LearningObjective.new('learningObjectives.caseItemUri', TAXONOMIES_SELECT, :learningObjectives, as_option: :learning_objectives, query_field: 'taxonomies.source'),
+          FieldTypes::LearningObjective.new('learningObjectives', Minerva.configuration.taxonomies_select_sql, :learningObjectives, query_field: 'taxonomies.identifier', as_option: :learning_objectives),
+          FieldTypes::LearningObjective.new('learningObjectives.id', Minerva.configuration.taxonomies_select_sql, :learningObjectives, as_option: :learning_objectives, query_field: 'taxonomies.id'),
+          FieldTypes::LearningObjective.new('learningObjectives.targetName', Minerva.configuration.taxonomies_select_sql, :learningObjectives, as_option: :learning_objectives, query_field: 'taxonomies.identifier'),
+          FieldTypes::LearningObjective.new('learningObjectives.caseItemGUID', Minerva.configuration.taxonomies_select_sql, :learningObjectives, as_option: :learning_objectives, query_field: 'taxonomies.opensalt_identifier'),
+          FieldTypes::LearningObjective.new('learningObjectives.alignmentType', Minerva.configuration.taxonomies_select_sql, :learningObjectives, as_option: :learning_objectives, query_field: 'taxonomies.alignment_type'),
+          FieldTypes::LearningObjective.new('learningObjectives.targetDescription', Minerva.configuration.taxonomies_select_sql, :learningObjectives, as_option: :learning_objectives, query_field: 'taxonomies.description'),
+          FieldTypes::LearningObjective.new('learningObjectives.targetURL', Minerva.configuration.taxonomies_select_sql, :learningObjectives, as_option: :learning_objectives, custom_search: true),
+          FieldTypes::LearningObjective.new('learningObjectives.educationalFramework', Minerva.configuration.taxonomies_select_sql, :learningObjectives, as_option: :learning_objectives, custom_search: true),
+          FieldTypes::LearningObjective.new('learningObjectives.caseItemUri', Minerva.configuration.taxonomies_select_sql, :learningObjectives, as_option: :learning_objectives, query_field: 'taxonomies.source'),
           FieldTypes::LearningResourceTypeField.new('learningResourceType', 'resources.learning_resource_type', :learningResourceType, as_option: :learning_resource_type, is_sortable: true),
           FieldTypes::CaseInsensitiveString.new('language', 'resources.language', :language, is_sortable: true),
           FieldTypes::TypicalAgeRange.new('typicalAgeRange', AGE_RANGE_SELECT, :typicalAgeRange, as_option: :typical_age_range, custom_search: true),

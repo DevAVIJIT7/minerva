@@ -4,7 +4,7 @@ module Minerva
   class Configuration
     attr_accessor :extension_fields, :authorizer, :search_by_taxonomy_aliases,
                   :filter_sql_proc, :count_resources_proc, :admin_auth_proc, :carrierwave, :after_search_proc,
-                  :hidden_extensions_attrs, :order_first_sql_proc, :subjects_select_sql, :update_denormalized_data_sql
+                  :hidden_extensions_attrs, :order_first_sql_proc, :subjects_select_sql, :taxonomies_select_sql, :update_denormalized_data_sql
 
     def initialize
       @extension_fields = []
@@ -16,6 +16,10 @@ module Minerva
       @count_resources_proc = nil
       @order_first_sql_proc = nil
       @subjects_select_sql = '(select array_agg(subjects.name) from subjects WHERE id = ANY(resources.all_subject_ids))'
+      @taxonomies_select_sql = "(select json_agg(json_build_object('id', taxonomies.id, 'opensalt_identifier', COALESCE(taxonomies.opensalt_identifier, ''),
+                                'description', COALESCE(taxonomies.description, ''), 'alignment_type', COALESCE(taxonomies.alignment_type, ''), 'source',
+                                COALESCE(taxonomies.source, ''), 'identifier', COALESCE(taxonomies.identifier, '')))
+                                FROM taxonomies WHERE id = ANY(resources.direct_taxonomy_ids))"
       @update_denormalized_data_sql = "
       direct_taxonomy_ids = (SELECT coalesce(array_agg(taxonomies.id), '{}') FROM taxonomies
                              INNER JOIN alignments ON taxonomies.id = alignments.taxonomy_id
