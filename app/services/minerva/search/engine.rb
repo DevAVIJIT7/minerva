@@ -20,7 +20,7 @@ module Minerva
     class Engine
       attr_accessor :search, :filter, :limit, :offset, :fields, :sort,
                     :order_by, :has_fields, :warning, :params, :resource_owner_id,
-                    :auth_scope, :jwt_info
+                    :auth_scope, :permissions
 
       DEFAULT_LIMIT  = 100
       DEFAULT_OFFSET = 0
@@ -29,14 +29,14 @@ module Minerva
 
       MAX_LIMIT      = 100
 
-      def initialize(params, resource_owner_id = nil, auth_scope = nil, jwt_info = nil)
+      def initialize(params, resource_owner_id = nil, auth_scope = nil, permissions = nil)
         sanitizer     = Sanitize.new(fields: params.fetch(:fields, nil), sort: params.fetch(:sort, 'name'), order_by: params.fetch(:orderBy, :asc))
         self.filter   = params.fetch(:filter, '')
         self.limit    = check_value(params[:limit].to_i, DEFAULT_LIMIT, MAX_LIMIT)
         self.offset   = params.fetch(:offset, '0').to_i
         self.fields   = sanitizer.fields
         self.sort     = sanitizer.sort
-        self.jwt_info = jwt_info
+        self.permissions = permissions
         self.warning  = sanitizer.warning
         self.order_by = sanitizer.order_by if sort.present?
         self.has_fields = sanitizer.has_fields
@@ -69,7 +69,7 @@ module Minerva
 
         resources = Resource.select("#{fields}").where(tf[:where])
         resources = sort_resources(resources, tf)
-        global_filter = Minerva.configuration.filter_sql_proc.call(resource_owner_id, auth_scope, jwt_info, params) if Minerva.configuration.filter_sql_proc
+        global_filter = Minerva.configuration.filter_sql_proc.call(resource_owner_id, auth_scope, permissions) if Minerva.configuration.filter_sql_proc
         resources = resources.where(global_filter) if global_filter
         cnt_query = Resource.where(tf[:where])
 
