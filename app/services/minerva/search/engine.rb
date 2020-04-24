@@ -69,7 +69,7 @@ module Minerva
 
         resources = Resource.select("#{fields}").where(tf[:where])
         resources = sort_resources(resources, tf)
-        global_filter = Minerva.configuration.filter_sql_proc.call(resource_owner_id, auth_scope, jwt_info) if Minerva.configuration.filter_sql_proc
+        global_filter = Minerva.configuration.filter_sql_proc.call(resource_owner_id, auth_scope, jwt_info, params) if Minerva.configuration.filter_sql_proc
         resources = resources.where(global_filter) if global_filter
         cnt_query = Resource.where(tf[:where])
 
