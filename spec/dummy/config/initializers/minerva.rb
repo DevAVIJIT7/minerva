@@ -23,7 +23,8 @@ Minerva.configure do |config|
 
   config.admin_auth_proc = Proc.new do |controller|
     authenticate_or_request_with_http_basic('Minerva') do |username, password|
-      controller.render(:json => "Forbidden", :status => 403, :layout => false)
+      true
+      #controller.render(:json => "Forbidden", :status => 403, :layout => false)
     end
   end
 
